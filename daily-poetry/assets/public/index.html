@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f5efe4">
+  <meta name="color-scheme" content="light">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'">
+  <title>小诗历 · 每日一首唐诗宋词</title>
+  <link rel="stylesheet" href="./style.css">
+  <script defer src="./poems.js"></script>
+  <script defer src="./schedule.js"></script>
+  <script defer src="./app.js"></script>
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <span class="seal" aria-hidden="true">诗</span>
+      <div><p class="brand-name">小诗历</p><p class="brand-sub">每日一首 · 唐诗宋词</p></div>
+    </div>
+    <span class="folio">唐<span aria-hidden="true"> / </span>宋</span>
+  </header>
+  <main id="content" tabindex="-1"><p class="loading">正在打开诗历…</p></main>
+  <footer class="credits"><a href="./poems-license.txt">诗库许可</a></footer>
+  <nav class="nav" aria-label="小诗历">
+    <button class="tab-button" data-view="today" type="button" aria-current="page"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5zM4 19.5A2.5 2.5 0 0 1 6.5 17H20M8 7h8m-8 4h5"/></svg><span>今日</span></button>
+    <button class="tab-button" data-view="history" type="button"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M7.5 3v4m9-4v4M4 10h16m-12 4h2m4 0h2m-8 3h2"/></svg><span>诗历</span></button>
+    <button class="tab-button" data-view="favorites" type="button"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16l-6-4-6 4z"/></svg><span>收藏</span></button>
+  </nav>
+  <p class="toast" id="toast" role="status"></p>
+</body>
+</html>

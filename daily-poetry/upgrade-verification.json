@@ -1,0 +1,32 @@
+{
+  "checks": [
+    "用旧版 APK 页面收藏，再升级同一个存储：当天的诗和已收藏状态不变",
+    "旧版收藏能从收藏夹打开全文并返回",
+    "从首日到闰日、昨日的历史仍完全一致，不能提前查未来诗",
+    "北京时间午夜后换诗，次日重开不变，补读升级当天仍显示原诗",
+    "完整检测前两轮：每轮所有作品恰出现一次，才开始下一轮",
+    "唐诗宋词分散穿插：首轮相同体裁连续不超过 2 天",
+    "中途扩充不改变历史或正在进行的一轮，从下一轮开始旧诗与新诗都恰好出现一次",
+    "已记录日期在手机时间回拨后仍受保护，新一批作品进入下一轮",
+    "离线过程中未请求外部资源，无页面脚本错误或横向溢出"
+  ],
+  "report": {
+    "total": 633,
+    "firstId": "tang-1487452b-5f49-4f4f-9913-1f3ec1cddf95",
+    "unknown": 0,
+    "uniqueFirst": 633,
+    "uniqueSecond": 633,
+    "peakGenreRun": 2,
+    "legacyUnchanged": true,
+    "archived": true,
+    "frozenRound": true,
+    "grownRound": true,
+    "rollbackRound": true,
+    "rollbackNext": true,
+    "sameCatalogRepeat": true,
+    "savedUnchanged": true
+  },
+  "errors": [],
+  "outside": [],
+  "verification": "Chrome 模拟将 1.0.0 APK 的原始网页更新到 1.1 并保留站点存储；未试装实体手机"
+}
