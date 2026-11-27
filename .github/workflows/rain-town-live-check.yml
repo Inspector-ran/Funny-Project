@@ -1,0 +1,25 @@
+name: Verify the public Little Rain Town
+
+on:
+  push:
+    branches: [rain-town-live-check]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Prepare browser
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Check two visits to the public town
+        env:
+          TOWN_TEST_RESIDENT: '验收d0f693f5'
+        run: node little-rain-town/backend/check-live.mjs
