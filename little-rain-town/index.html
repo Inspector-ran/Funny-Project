@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f5e9">
+  <meta name="description" content="捏几个小人，看他们在毛毛雨小镇慢慢熟起来。">
+  <title>毛毛雨小镇</title>
+  <link rel="stylesheet" href="./town.css">
+  <script defer src="./world.js"></script>
+  <script defer src="./town.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="brand-icon" aria-hidden="true">☂</span>
+        <div><h1>毛毛雨小镇</h1><p>给小人们一片自由生活的地方</p></div>
+      </div>
+      <div class="top-actions">
+        <span id="save-state" class="save-state"><i></i>自动保存</span>
+        <button class="button primary" type="button" data-new>＋ 捏个小人</button>
+      </div>
+    </div>
+  </header>
+  <main class="layout">
+    <section class="panel map-panel" aria-labelledby="map-title">
+      <div class="panel-heading map-heading">
+        <div><h2 id="map-title">小镇地图</h2><p>点一个小人或地点，看看那里在发生什么。</p></div>
+        <div class="clock"><span id="weather-icon" class="weather-icon" aria-hidden="true">☀</span><div><strong id="world-time">第 1 天 · 09:00</strong><span id="world-weather">晴间多云</span></div></div>
+      </div>
+      <div class="map-frame">
+        <canvas id="landscape" width="900" height="540" aria-hidden="true"></canvas>
+        <div id="map-places" class="map-layer"></div>
+        <div id="map-residents" class="map-layer"></div>
+      </div>
+      <div class="map-toolbar">
+        <button class="button soft" id="meet-button" type="button"><span aria-hidden="true">♡</span> 安排见面</button>
+        <div class="time-controls">
+          <button class="button quiet" id="play-toggle" type="button" aria-pressed="true">Ⅱ 暂停</button>
+          <button class="button soft" id="step-button" type="button">推进时间 <span aria-hidden="true">↻</span></button>
+        </div>
+      </div>
+    </section>
+    <aside class="panel journal" aria-labelledby="journal-title">
+      <div class="panel-heading journal-heading"><div><h2 id="journal-title">今天的小事</h2><p>居民的偶遇和小小心事</p></div><span class="journal-icon" aria-hidden="true">✿</span></div>
+      <div class="tabs" role="tablist" aria-label="小镇记录">
+        <button id="events-tab" type="button" role="tab" aria-selected="true" aria-controls="events-pane">小镇动态</button>
+        <button id="bonds-tab" type="button" role="tab" aria-selected="false" aria-controls="bonds-pane" tabindex="-1">居民关系</button>
+      </div>
+      <div id="events-pane" class="journal-pane" role="tabpanel" aria-labelledby="events-tab"><ol id="event-list" class="event-list"></ol></div>
+      <div id="bonds-pane" class="journal-pane" role="tabpanel" aria-labelledby="bonds-tab" hidden><div id="bond-list" class="bond-list"></div></div>
+    </aside>
+    <section class="panel residents" aria-labelledby="residents-title">
+      <div class="panel-heading residents-heading"><div><h2 id="residents-title">小镇居民 <span class="resident-count" id="resident-count"></span></h2><p>每个小人都有自己的习惯。</p></div></div>
+      <div id="resident-list" class="resident-list"></div>
+    </section>
+  </main>
+  <dialog id="resident-dialog" aria-labelledby="resident-dialog-title">
+    <form id="resident-form">
+      <div class="dialog-heading"><h2 id="resident-dialog-title">捏个小人</h2><button class="close" type="button" data-close aria-label="关闭">×</button></div>
+      <div class="create-preview"><img id="resident-preview" width="96" height="96" alt=""><div><strong id="preview-name">新来的小人</strong><p id="preview-detail"></p></div></div>
+      <div id="create-tools" class="create-tools"><button type="button" class="button soft small" id="random-resident">♧ 随机捏一个</button><button type="button" class="button soft small" id="personal-resident">✿ 试试「我的小人」</button></div>
+      <div class="form-grid">
+        <label>名字<input id="resident-name" name="name" required maxlength="12" autocomplete="off" placeholder="给小人起个名字"></label>
+        <label>性格<select name="temper" id="resident-temper"></select></label>
+        <label>发型<select name="hair" id="resident-hair"></select></label>
+        <label>发色<select name="hairColor" id="resident-hairColor"></select></label>
+        <label>衣服颜色<select name="shirt" id="resident-shirt"></select></label>
+        <label>肤色<select name="skin" id="resident-skin"></select></label>
+        <label>小爱好<select name="hobby" id="resident-hobby"></select></label>
+        <label>口头禅<input name="phrase" id="resident-phrase" maxlength="36" autocomplete="off" placeholder="小人偶尔会说这句"></label>
+      </div>
+      <div class="dialog-actions"><button id="remove-resident" class="button danger" type="button" hidden>搬离小镇</button><button id="save-resident" class="button primary" type="submit">搬进小镇</button></div>
+    </form>
+  </dialog>
+  <dialog id="detail-dialog" aria-labelledby="detail-title">
+    <div class="dialog-heading"><h2 id="detail-title"></h2><button class="close" type="button" data-close aria-label="关闭">×</button></div>
+    <div id="detail-content"></div>
+    <div class="dialog-actions" id="detail-actions"></div>
+  </dialog>
+  <dialog id="meet-dialog" aria-labelledby="meet-title">
+    <form id="meet-form">
+      <div class="dialog-heading"><h2 id="meet-title">安排见面</h2><button class="close" type="button" data-close aria-label="关闭">×</button></div>
+      <p class="dialog-note">挑两位居民，再选个碰面的地方。</p>
+      <div class="form-grid meet-grid"><label>第一位居民<select id="meet-first" required></select></label><label>第二位居民<select id="meet-second" required></select></label><label>碰面地点<select id="meet-place" required></select></label></div>
+      <div class="dialog-actions"><button class="button primary" type="submit">让他们碰面</button></div>
+    </form>
+  </dialog>
+  <div id="toast" class="toast" role="status"></div>
+</body>
+</html>
