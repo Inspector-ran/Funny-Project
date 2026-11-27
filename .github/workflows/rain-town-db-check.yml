@@ -1,0 +1,44 @@
+name: Check Little Rain Town database
+
+on:
+  push:
+    branches: [rain-town-db-check]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_PASSWORD: rain-town-test-only
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 3
+      - name: Initialize test roles
+        env:
+          PG_CONTAINER: ${{ job.services.postgres.id }}
+        run: |
+          docker exec "$PG_CONTAINER" psql -U postgres -v ON_ERROR_STOP=1 -c 'create role anon nologin; create role authenticated nologin;'
+          docker exec "$PG_CONTAINER" createdb -U postgres upgraded
+      - name: Verify fresh installation and upgrade
+        env:
+          PG_CONTAINER: ${{ job.services.postgres.id }}
+        run: |
+          psql_check() { docker exec -i "$PG_CONTAINER" psql -U postgres -v ON_ERROR_STOP=1 -d "$1"; }
+          psql_check postgres < little-rain-town/backend/setup.sql
+          psql_check postgres < little-rain-town/backend/setup.sql
+          psql_check postgres < little-rain-town/backend/verify.sql
+          git show HEAD~2:little-rain-town/backend/setup.sql | psql_check upgraded
+          psql_check upgraded < little-rain-town/backend/setup.sql
+          psql_check upgraded < little-rain-town/backend/verify.sql
