@@ -28,6 +28,9 @@ h1, h2, h3, p { margin: 0; }
 .save-state { display: inline-flex; align-items: center; gap: 7px; color: var(--muted); white-space: nowrap; font-size: 13px; }
 .save-state i { width: 7px; height: 7px; border-radius: 50%; background: #63986c; }
 .save-state.unavailable i { background: #bb7753; }
+.shared-banner { max-width: 1320px; min-height: 48px; margin: 0 auto -7px; padding: 8px 34px 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 14px; }
+.form-error { margin-top: 10px; color: #874a3c; font-size: 14px; line-height: 1.5; }
+.invite-label { grid-column: 1 / -1; }
 .button { border: 1px solid transparent; min-height: 42px; border-radius: 11px; padding: 8px 15px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; white-space: nowrap; font-size: 14px; font-weight: 700; transition: background .16s, transform .16s; }
 .button:active:not(:disabled), .place-pin:active { transform: translateY(1px); }
 .primary { color: #fffdf3; background: var(--green); border-color: #244d39; box-shadow: 0 2px #214835; }
@@ -50,12 +53,14 @@ h1, h2, h3, p { margin: 0; }
 .map-frame { position: relative; margin: 0 12px; overflow: hidden; isolation: isolate; aspect-ratio: 900 / 540; border-radius: 13px; border: 1px solid #9cac79; background: #bdd28e; }
 #landscape, .map-layer { position: absolute; inset: 0; width: 100%; height: 100%; }
 .map-layer { pointer-events: none; }
+#map-places { z-index: 1; }
 .map-layer button { pointer-events: auto; }
 .place-marker, .map-person { position: absolute; }
 .place-marker { transform: translate(-50%, -50%); }
 .place-pin { display: flex; align-items: center; gap: 5px; font-size: clamp(10px, 1vw, 13px); font-weight: 750; white-space: nowrap; padding: 5px 8px; background: #fffbed; border: 1px solid #87916f; border-radius: 100px; box-shadow: 0 2px #52644042; cursor: pointer; }
 .place-pin:hover { background: #fff5ce; }
 .place-pin .place-glyph { color: #536e4e; line-height: 1; }
+.place-directory { display: none; }
 .map-person { height: 0; width: 0; transition: top 1.05s ease, left 1.05s ease; }
 .sprite { position: absolute; bottom: 0; left: 0; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; border: 0; background: transparent; padding: 0; cursor: pointer; }
 .sprite img { width: clamp(35px, 5.2vw, 75px); height: auto; margin-bottom: -7px; filter: drop-shadow(0 3px 1px #2c4d3040); transition: transform .25s; }
@@ -103,6 +108,7 @@ h1, h2, h3, p { margin: 0; }
 .add-card span { font-size: 21px; }
 dialog { width: min(530px, calc(100% - 24px)); max-height: calc(100dvh - 32px); overflow: auto; padding: 20px; border: 1px solid var(--line); border-radius: 19px; background: var(--paper); color: var(--ink); box-shadow: 0 10px 40px #263e3450; }
 dialog::backdrop { background: #263c3c65; backdrop-filter: blur(2px); }
+#resident-dialog { width: min(600px, calc(100% - 24px)); }
 .dialog-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 13px; }
 .close { width: 36px; height: 36px; border: 1px solid #dedfce; border-radius: 10px; background: #f1f1e8; cursor: pointer; font-size: 23px; line-height: 1; }
 .create-preview { display: flex; align-items: center; gap: 14px; padding: 4px 13px; border-radius: 13px; border: 1px solid #e3e6d7; background: #eef1e4; }
@@ -111,6 +117,10 @@ dialog::backdrop { background: #263c3c65; backdrop-filter: blur(2px); }
 .create-preview p, .dialog-note { color: var(--muted); margin-top: 5px; font-size: 14px; line-height: 1.6; overflow-wrap: anywhere; }
 .create-tools { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 10px; }
 .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 15px; }
+.form-grid:is(fieldset) { border: 1px solid #e4e5d7; border-radius: 11px; margin-inline: 0; padding: 8px 11px 11px; min-width: 0; }
+.form-grid legend { padding: 0 5px; font-size: 14px; font-weight: 800; color: var(--green); }
+.wardrobe { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.visit-grid label { grid-column: 1 / -1; }
 .form-grid label { display: grid; gap: 5px; font-size: 14px; font-weight: 690; }
 .form-grid input, .form-grid select { width: 100%; min-height: 41px; border: 1px solid #d9ddcc; border-radius: 9px; padding: 6px 8px; background-color: #fffefb; color: var(--ink); font-size: 16px; }
 .form-grid select { appearance: none; padding-right: 22px; background-image: linear-gradient(45deg, transparent 50%, #59725f 50%), linear-gradient(135deg, #59725f 50%, transparent 50%); background-position: calc(100% - 13px) 52%, calc(100% - 9px) 52%; background-size: 4px 4px; background-repeat: no-repeat; }
@@ -135,6 +145,7 @@ dialog::backdrop { background: #263c3c65; backdrop-filter: blur(2px); }
   .brand p { font-size: 12px; }
   .top-actions { gap: 5px; }
   .save-state { display: none; }
+  .shared-banner { padding-inline: 12px; min-height: 43px; }
   .journal-pane { min-height: 270px; }
   .panel-heading { min-height: 69px; padding: 10px 12px; }
   .panel-heading h2 { font-size: 19px; }
@@ -149,8 +160,15 @@ dialog::backdrop { background: #263c3c65; backdrop-filter: blur(2px); }
   .clock strong { font-size: 12px; }
   .map-toolbar .button { padding-inline: 7px; font-size: 13px; }
   .place-pin { padding: 3px 5px; }
-  .place-pin .place-glyph { display: none; }
   .sprite img { margin-bottom: -5px; }
+}
+@media (max-width: 630px) {
+  .place-directory { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; margin: 8px 7px 0; }
+  .place-directory button { min-height: 34px; border: 1px solid #e2e6d7; border-radius: 8px; padding: 4px; background: #f2f4e8; font-size: 12px; cursor: pointer; }
+  .place-directory button:hover { background: #e6ecdc; }
+  .place-pin { justify-content: center; width: 25px; height: 25px; padding: 0; font-size: 14px; }
+  .place-pin .place-name { display: none; }
+  .wardrobe { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; }

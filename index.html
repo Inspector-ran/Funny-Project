@@ -4,10 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f6f5e9">
-  <meta name="description" content="捏几个小人，看他们在毛毛雨小镇慢慢熟起来。">
+  <meta name="description" content="捏个小人，到毛毛雨小镇寄信、种花、露营和看星星。">
   <title>毛毛雨小镇</title>
   <link rel="stylesheet" href="./town.css">
   <script defer src="./world.js"></script>
+  <script defer src="./shared-config.js"></script>
+  <script defer src="./shared-town.js"></script>
   <script defer src="./town.js"></script>
 </head>
 <body>
@@ -23,6 +25,10 @@
       </div>
     </div>
   </header>
+  <div id="shared-banner" class="shared-banner" hidden>
+    <span id="shared-status" role="status">正在连接共享小镇…</span>
+    <button id="shared-sign-out" class="button quiet small" type="button" hidden>退出邀请码</button>
+  </div>
   <main class="layout">
     <section class="panel map-panel" aria-labelledby="map-title">
       <div class="panel-heading map-heading">
@@ -34,6 +40,7 @@
         <div id="map-places" class="map-layer"></div>
         <div id="map-residents" class="map-layer"></div>
       </div>
+      <nav id="place-directory" class="place-directory" aria-label="小镇地点"></nav>
       <div class="map-toolbar">
         <button class="button soft" id="meet-button" type="button"><span aria-hidden="true">♡</span> 安排见面</button>
         <div class="time-controls">
@@ -61,16 +68,24 @@
       <div class="dialog-heading"><h2 id="resident-dialog-title">捏个小人</h2><button class="close" type="button" data-close aria-label="关闭">×</button></div>
       <div class="create-preview"><img id="resident-preview" width="96" height="96" alt=""><div><strong id="preview-name">新来的小人</strong><p id="preview-detail"></p></div></div>
       <div id="create-tools" class="create-tools"><button type="button" class="button soft small" id="random-resident">♧ 随机捏一个</button><button type="button" class="button soft small" id="personal-resident">✿ 试试「我的小人」</button></div>
-      <div class="form-grid">
-        <label>名字<input id="resident-name" name="name" required maxlength="12" autocomplete="off" placeholder="给小人起个名字"></label>
-        <label>性格<select name="temper" id="resident-temper"></select></label>
+      <fieldset class="form-grid wardrobe">
+        <legend>外观</legend>
         <label>发型<select name="hair" id="resident-hair"></select></label>
         <label>发色<select name="hairColor" id="resident-hairColor"></select></label>
-        <label>衣服颜色<select name="shirt" id="resident-shirt"></select></label>
         <label>肤色<select name="skin" id="resident-skin"></select></label>
+        <label>表情<select name="expression" id="resident-expression"></select></label>
+        <label>衣服<select name="outfit" id="resident-outfit"></select></label>
+        <label>衣服颜色<select name="shirt" id="resident-shirt"></select></label>
+        <label>配饰<select name="accessory" id="resident-accessory"></select></label>
+      </fieldset>
+      <fieldset class="form-grid">
+        <legend>名字和习惯</legend>
+        <label>名字<input id="resident-name" name="name" required maxlength="12" autocomplete="off" placeholder="给小人起个名字"></label>
+        <label>性格<select name="temper" id="resident-temper"></select></label>
         <label>小爱好<select name="hobby" id="resident-hobby"></select></label>
         <label>口头禅<input name="phrase" id="resident-phrase" maxlength="36" autocomplete="off" placeholder="小人偶尔会说这句"></label>
-      </div>
+      </fieldset>
+      <p id="resident-error" class="form-error" role="alert" hidden></p>
       <div class="dialog-actions"><button id="remove-resident" class="button danger" type="button" hidden>搬离小镇</button><button id="save-resident" class="button primary" type="submit">搬进小镇</button></div>
     </form>
   </dialog>
@@ -84,7 +99,26 @@
       <div class="dialog-heading"><h2 id="meet-title">安排见面</h2><button class="close" type="button" data-close aria-label="关闭">×</button></div>
       <p class="dialog-note">挑两位居民，再选个碰面的地方。</p>
       <div class="form-grid meet-grid"><label>第一位居民<select id="meet-first" required></select></label><label>第二位居民<select id="meet-second" required></select></label><label>碰面地点<select id="meet-place" required></select></label></div>
+      <p id="meet-error" class="form-error" role="alert" hidden></p>
       <div class="dialog-actions"><button class="button primary" type="submit">让他们碰面</button></div>
+    </form>
+  </dialog>
+  <dialog id="visit-dialog" aria-labelledby="visit-title">
+    <form id="visit-form">
+      <div class="dialog-heading"><h2 id="visit-title">去看看</h2><button class="close" type="button" data-close aria-label="关闭">×</button></div>
+      <p id="visit-note" class="dialog-note"></p>
+      <div class="form-grid visit-grid"><label>带哪位小人去<select id="visit-resident" required></select></label></div>
+      <p id="visit-error" class="form-error" role="alert" hidden></p>
+      <div class="dialog-actions"><button class="button primary" type="submit">出发</button></div>
+    </form>
+  </dialog>
+  <dialog id="invite-dialog" aria-labelledby="invite-title">
+    <form id="invite-form">
+      <div class="dialog-heading"><h2 id="invite-title">用邀请码进镇</h2><button class="close" type="button" data-close aria-label="关闭">×</button></div>
+      <p class="dialog-note">每个邀请码对应一个小人。换设备时，用原来的码就能继续编辑。小人的昵称、外观和口头禅会展示在共享小镇里。</p>
+      <div class="form-grid"><label class="invite-label">邀请码<input name="code" type="password" required maxlength="40" autocomplete="off" spellcheck="false" autocapitalize="none"></label></div>
+      <p id="invite-error" class="form-error" role="alert" hidden></p>
+      <div class="dialog-actions"><button class="button primary" type="submit">进入小镇</button></div>
     </form>
   </dialog>
   <div id="toast" class="toast" role="status"></div>
