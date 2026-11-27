@@ -28,6 +28,9 @@ h1, h2, h3, p { margin: 0; }
 .save-state { display: inline-flex; align-items: center; gap: 7px; color: var(--muted); white-space: nowrap; font-size: 13px; }
 .save-state i { width: 7px; height: 7px; border-radius: 50%; background: #63986c; }
 .save-state.unavailable i { background: #bb7753; }
+.shared-banner { max-width: 1320px; min-height: 48px; margin: 0 auto -7px; padding: 8px 34px 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 14px; }
+.form-error { margin-top: 10px; color: #874a3c; font-size: 14px; line-height: 1.5; }
+.invite-label { grid-column: 1 / -1; }
 .button { border: 1px solid transparent; min-height: 42px; border-radius: 11px; padding: 8px 15px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; white-space: nowrap; font-size: 14px; font-weight: 700; transition: background .16s, transform .16s; }
 .button:active:not(:disabled), .place-pin:active { transform: translateY(1px); }
 .primary { color: #fffdf3; background: var(--green); border-color: #244d39; box-shadow: 0 2px #214835; }
@@ -135,6 +138,7 @@ dialog::backdrop { background: #263c3c65; backdrop-filter: blur(2px); }
   .brand p { font-size: 12px; }
   .top-actions { gap: 5px; }
   .save-state { display: none; }
+  .shared-banner { padding-inline: 12px; min-height: 43px; }
   .journal-pane { min-height: 270px; }
   .panel-heading { min-height: 69px; padding: 10px 12px; }
   .panel-heading h2 { font-size: 19px; }

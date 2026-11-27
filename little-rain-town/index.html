@@ -8,6 +8,8 @@
   <title>毛毛雨小镇</title>
   <link rel="stylesheet" href="./town.css">
   <script defer src="./world.js"></script>
+  <script defer src="./shared-config.js"></script>
+  <script defer src="./shared-town.js"></script>
   <script defer src="./town.js"></script>
 </head>
 <body>
@@ -23,6 +25,10 @@
       </div>
     </div>
   </header>
+  <div id="shared-banner" class="shared-banner" hidden>
+    <span id="shared-status" role="status">正在连接共享小镇…</span>
+    <button id="shared-sign-out" class="button quiet small" type="button" hidden>退出邀请码</button>
+  </div>
   <main class="layout">
     <section class="panel map-panel" aria-labelledby="map-title">
       <div class="panel-heading map-heading">
@@ -71,6 +77,7 @@
         <label>小爱好<select name="hobby" id="resident-hobby"></select></label>
         <label>口头禅<input name="phrase" id="resident-phrase" maxlength="36" autocomplete="off" placeholder="小人偶尔会说这句"></label>
       </div>
+      <p id="resident-error" class="form-error" role="alert" hidden></p>
       <div class="dialog-actions"><button id="remove-resident" class="button danger" type="button" hidden>搬离小镇</button><button id="save-resident" class="button primary" type="submit">搬进小镇</button></div>
     </form>
   </dialog>
@@ -84,7 +91,17 @@
       <div class="dialog-heading"><h2 id="meet-title">安排见面</h2><button class="close" type="button" data-close aria-label="关闭">×</button></div>
       <p class="dialog-note">挑两位居民，再选个碰面的地方。</p>
       <div class="form-grid meet-grid"><label>第一位居民<select id="meet-first" required></select></label><label>第二位居民<select id="meet-second" required></select></label><label>碰面地点<select id="meet-place" required></select></label></div>
+      <p id="meet-error" class="form-error" role="alert" hidden></p>
       <div class="dialog-actions"><button class="button primary" type="submit">让他们碰面</button></div>
+    </form>
+  </dialog>
+  <dialog id="invite-dialog" aria-labelledby="invite-title">
+    <form id="invite-form">
+      <div class="dialog-heading"><h2 id="invite-title">用邀请码进镇</h2><button class="close" type="button" data-close aria-label="关闭">×</button></div>
+      <p class="dialog-note">每个邀请码对应一个小人。换设备时，用原来的码就能继续编辑。小人的昵称、外观和口头禅会展示在共享小镇里。</p>
+      <div class="form-grid"><label class="invite-label">邀请码<input name="code" type="password" required maxlength="40" autocomplete="off" spellcheck="false" autocapitalize="none"></label></div>
+      <p id="invite-error" class="form-error" role="alert" hidden></p>
+      <div class="dialog-actions"><button class="button primary" type="submit">进入小镇</button></div>
     </form>
   </dialog>
   <div id="toast" class="toast" role="status"></div>

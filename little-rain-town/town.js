@@ -67,7 +67,13 @@
   const bondList = byId('bond-list');
   const markers = byId('map-residents');
   const portraitCache = new Map();
-  let state = load();
+  const shared = window.SharedTown;
+  const inviteDialog = byId('invite-dialog');
+  let invite = shared?.loadInvite() ?? null;
+  let playerId = null;
+  let connected = false;
+  let refreshing = false;
+  let state = shared ? { ...initialState(), people: [], bonds: {}, events: [], revision: -1 } : load();
   let paused = Boolean(state.paused);
   let editingId = null;
   let toastTimer;
@@ -104,6 +110,11 @@
 
   function save() {
     const indicator = byId('save-state');
+    if (shared) {
+      indicator.classList.toggle('unavailable', !connected);
+      indicator.lastChild.textContent = connected ? '共享存档' : '同步中';
+      return;
+    }
     try {
       window.localStorage.setItem(key, JSON.stringify(state));
       indicator.classList.remove('unavailable');
@@ -111,6 +122,74 @@
     } catch {
       indicator.classList.add('unavailable');
       indicator.lastChild.textContent = '当前无法存档';
+    }
+  }
+
+  function myResident() {
+    return state.people.find(person => person.id === playerId);
+  }
+
+  function sharedStatus() {
+    if (!shared) return;
+    const me = myResident();
+    byId('shared-banner').hidden = false;
+    byId('shared-status').textContent = !connected
+      ? '共享小镇连接中，稍后会自动重试。'
+      : me ? `共享小镇 · 你的小人是「${me.name}」`
+        : playerId ? '共享小镇 · 可以创建你的小人' : '共享小镇 · 大家会看到同一批居民';
+    byId('shared-sign-out').hidden = !playerId;
+  }
+
+  function applySnapshot(snapshot) {
+    if (!Array.isArray(snapshot?.people) || !Number.isSafeInteger(snapshot.revision)) throw new Error('RAIN_CONNECTION');
+    const reconnecting = !connected;
+    connected = true;
+    if (snapshot.revision > state.revision) {
+      const profileTraits = ({ id, name, temper, hair, hairColor, shirt, skin, hobby }) =>
+        [id, name, temper, hair, hairColor, shirt, skin, hobby];
+      const cardsChanged = JSON.stringify(snapshot.people.map(profileTraits)) !== JSON.stringify(state.people.map(profileTraits));
+      state = snapshot;
+      update(cardsChanged || reconnecting);
+    } else if (reconnecting) {
+      renderCards();
+      save();
+    }
+    sharedStatus();
+  }
+
+  function forgetInvite() {
+    invite = null;
+    playerId = null;
+    shared.storeInvite(null);
+    renderCards();
+    sharedStatus();
+  }
+
+  async function refreshShared() {
+    if (refreshing || document.hidden) return;
+    refreshing = true;
+    try {
+      const snapshot = await shared.call(connected ? 'step' : 'read', connected ? { p_code: null, p_manual: false } : {});
+      applySnapshot(snapshot);
+      if (invite && !playerId) {
+        const attempted = invite;
+        try {
+          const result = await shared.call('sign_in', { p_code: attempted });
+          if (invite !== attempted || playerId) return;
+          playerId = result.playerId;
+          renderCards();
+          sharedStatus();
+        } catch (error) {
+          if (invite === attempted && error.message === 'RAIN_INVITE_INVALID') forgetInvite();
+        }
+      }
+    } catch {
+      connected = false;
+      renderCards();
+      save();
+      sharedStatus();
+    } finally {
+      refreshing = false;
     }
   }
 
@@ -266,14 +345,22 @@
     add.dataset.card = 'new';
     const plus = el('span', '', '＋');
     plus.setAttribute('aria-hidden', 'true');
-    add.append(plus, state.people.length < maxPeople ? ' 捏个小人' : ' 小镇已住满');
-    add.disabled = state.people.length >= maxPeople;
-    add.addEventListener('click', () => showEditor());
+    const addLabel = shared ? myResident() ? ' 我的小人' : playerId ? ' 捏我的小人' : ' 用邀请码进镇'
+      : state.people.length < maxPeople ? ' 捏个小人' : ' 小镇已住满';
+    add.append(plus, addLabel);
+    add.disabled = shared ? !connected : state.people.length >= maxPeople;
+    add.addEventListener('click', startResident);
     list.replaceChildren(...cards, add);
     if (focused) [...list.children].find(card => card.dataset.card === focused)?.focus({ preventScroll: true });
     byId('resident-count').textContent = state.people.length;
-    byId('meet-button').disabled = state.people.length < 2;
-    document.querySelector('[data-new]').disabled = state.people.length >= maxPeople;
+    const canMeet = state.people.length >= 2 && (!shared || connected && myResident());
+    byId('meet-button').disabled = !canMeet;
+    const newButton = document.querySelector('[data-new]');
+    newButton.disabled = add.disabled;
+    if (shared) {
+      newButton.textContent = addLabel.trim();
+      byId('step-button').disabled = !canMeet;
+    }
   }
 
   function renderJournal() {
@@ -360,9 +447,9 @@
     byId('detail-content').replaceChildren(summary);
     const actions = byId('detail-actions');
     const edit = action('编辑小人', 'soft', () => closeDetailThen(() => showEditor(id)));
-    const invite = action('安排见面', 'primary', () => closeDetailThen(() => showMeeting(person.place, id)));
-    invite.disabled = state.people.length < 2;
-    actions.replaceChildren(edit, invite);
+    const meeting = action('安排见面', 'primary', () => closeDetailThen(() => showMeeting(person.place, id)));
+    meeting.disabled = state.people.length < 2 || Boolean(shared && (!connected || !myResident()));
+    actions.replaceChildren(...(!shared || id === playerId ? [edit, meeting] : [meeting]));
     if (!detailDialog.open) detailDialog.showModal();
   }
 
@@ -385,7 +472,7 @@
       content.append(el('p', 'empty', '现在这里很安静。'));
     }
     const invite = action('约在这里见面', 'primary', () => closeDetailThen(() => showMeeting(id)));
-    invite.disabled = state.people.length < 2;
+    invite.disabled = state.people.length < 2 || Boolean(shared && (!connected || !myResident()));
     byId('detail-actions').replaceChildren(invite);
     detailDialog.showModal();
   }
@@ -411,15 +498,33 @@
     preview();
   }
 
+  function formError(id, message = '') {
+    const field = byId(id);
+    field.textContent = message;
+    field.hidden = !message;
+  }
+
+  function startResident() {
+    if (shared && !playerId) {
+      if (!connected) return;
+      byId('invite-form').reset();
+      formError('invite-error');
+      inviteDialog.showModal();
+      return;
+    }
+    showEditor(myResident()?.id);
+  }
+
   function showEditor(id = null) {
     const person = state.people.find(item => item.id === id);
-    if (!person && state.people.length >= maxPeople) return;
+    if (shared ? !connected || !playerId || (person && person.id !== playerId) : !person && state.people.length >= maxPeople) return;
     editingId = person?.id ?? null;
     byId('resident-dialog-title').textContent = person ? '编辑小人' : '捏个小人';
     byId('create-tools').hidden = Boolean(person);
-    byId('remove-resident').hidden = !person;
+    byId('remove-resident').hidden = !person || Boolean(shared);
     byId('save-resident').textContent = person ? '保存改动' : '搬进小镇';
     fillEditor(person ?? defaults);
+    formError('resident-error');
     residentDialog.showModal();
   }
 
@@ -440,12 +545,19 @@
   }
 
   function showMeeting(place = 'square', personId) {
-    if (state.people.length < 2) return;
+    if (state.people.length < 2 || (shared && (!connected || !myResident()))) return;
     const first = byId('meet-first');
     selectOptions(first, state.people.map(person => [person.id, person.name]));
-    if (personId) first.value = personId;
-    refreshSecond();
+    if (shared) {
+      first.value = playerId;
+      first.disabled = true;
+      refreshSecond(personId);
+    } else {
+      if (personId) first.value = personId;
+      refreshSecond();
+    }
     byId('meet-place').value = place;
+    formError('meet-error');
     meetDialog.showModal();
   }
 
@@ -474,15 +586,31 @@
   }
   selectOptions(byId('meet-place'), Object.entries(places).map(([id, place]) => [id, place.name]));
 
-  document.querySelector('[data-new]').addEventListener('click', () => showEditor());
+  document.querySelector('[data-new]').addEventListener('click', startResident);
   document.querySelectorAll('[data-close]').forEach(button => button.addEventListener('click', () => button.closest('dialog').close()));
   byId('meet-button').addEventListener('click', () => showMeeting());
   byId('meet-first').addEventListener('change', () => refreshSecond(byId('meet-second').value));
-  byId('meet-form').addEventListener('submit', event => {
+  byId('meet-form').addEventListener('submit', async event => {
     event.preventDefault();
     const [a, b] = ['meet-first', 'meet-second'].map(id => state.people.find(person => person.id === byId(id).value));
     const place = byId('meet-place').value;
     if (!a || !b || a === b || !places[place]) return;
+    if (shared) {
+      const submit = event.submitter ?? event.target.querySelector('[type="submit"]');
+      if (!invite || submit.disabled) return;
+      formError('meet-error');
+      submit.disabled = true;
+      try {
+        applySnapshot(await shared.call('meet', { p_code: invite, p_other: b.id, p_place: place }));
+        meetDialog.close();
+        notify(`${a.name}和${b.name}见面了`);
+      } catch (error) {
+        formError('meet-error', shared.message(error));
+      } finally {
+        submit.disabled = false;
+      }
+      return;
+    }
     tickClock();
     meet(a, b, place);
     meetDialog.close();
@@ -490,12 +618,27 @@
     notify(`${a.name}和${b.name}见面了`);
   });
   byId('play-toggle').addEventListener('click', () => {
+    if (shared) return;
     paused = !paused;
     state.paused = paused;
     renderPause();
     save();
   });
-  byId('step-button').addEventListener('click', advance);
+  byId('step-button').addEventListener('click', async event => {
+    if (!shared) {
+      advance();
+      return;
+    }
+    const button = event.currentTarget;
+    button.disabled = true;
+    try {
+      applySnapshot(await shared.call('step', { p_code: invite, p_manual: true }));
+    } catch (error) {
+      notify(shared.message(error));
+    } finally {
+      button.disabled = !connected || !myResident();
+    }
+  });
   byId('random-resident').addEventListener('click', () => {
     const traits = Object.fromEntries(Object.entries(options).map(([property, values]) => [property, pick(Object.keys(values))]));
     const names = ['豆沙', '小麦', '团团', '小苔', '阿雾', '柚子', '小纸船'].filter(name => !state.people.some(person => person.name === name));
@@ -506,9 +649,10 @@
   });
   residentForm.addEventListener('input', () => {
     byId('resident-name').setCustomValidity('');
+    formError('resident-error');
     preview();
   });
-  residentForm.addEventListener('submit', event => {
+  residentForm.addEventListener('submit', async event => {
     event.preventDefault();
     const draft = formPerson();
     draft.name = draft.name.trim();
@@ -518,6 +662,27 @@
     if (!draft.name || state.people.some(person => person !== current && person.name === draft.name)) {
       nameField.setCustomValidity(draft.name ? '镇上已经有同名的小人了。' : '给小人起个名字吧。');
       nameField.reportValidity();
+      return;
+    }
+    if (shared) {
+      const submit = byId('save-resident');
+      if (!invite || submit.disabled) return;
+      submit.disabled = true;
+      try {
+        applySnapshot(await shared.call('save', { p_code: invite, p_profile: draft, p_create: !current }));
+        residentDialog.close();
+        notify(current ? '改动已同步' : `欢迎${draft.name}！`);
+      } catch (error) {
+        if (error.message === 'RAIN_ALREADY_JOINED') {
+          await refreshShared();
+          residentDialog.close();
+          notify(shared.message(error));
+        } else {
+          formError('resident-error', shared.message(error));
+        }
+      } finally {
+        submit.disabled = false;
+      }
       return;
     }
     if (current) {
@@ -532,6 +697,7 @@
     notify(current ? '改动已保存' : `欢迎${draft.name}！`);
   });
   byId('remove-resident').addEventListener('click', () => {
+    if (shared) return;
     const person = state.people.find(item => item.id === editingId);
     if (!person || !window.confirm(`让${person.name}搬离小镇？这也会清除这个小人的关系记录。`)) return;
     state.people = state.people.filter(item => item.id !== person.id);
@@ -564,8 +730,40 @@
   });
 
   update(true);
-  renderPause();
-  window.setInterval(() => {
-    if (!paused && !document.hidden && !document.querySelector('dialog[open]') && state.people.length) advance();
-  }, 16000);
+  if (shared) {
+    byId('play-toggle').hidden = true;
+    sharedStatus();
+    byId('shared-sign-out').addEventListener('click', forgetInvite);
+    byId('invite-form').addEventListener('submit', async event => {
+      event.preventDefault();
+      const submit = event.submitter ?? event.target.querySelector('[type="submit"]');
+      if (submit.disabled) return;
+      const code = new FormData(event.target).get('code').trim();
+      formError('invite-error');
+      submit.disabled = true;
+      try {
+        const result = await shared.call('sign_in', { p_code: code });
+        const snapshot = await shared.call('read');
+        playerId = result.playerId;
+        invite = code;
+        shared.storeInvite(code);
+        applySnapshot(snapshot);
+        renderCards();
+        inviteDialog.close();
+        startResident();
+      } catch (error) {
+        formError('invite-error', shared.message(error));
+      } finally {
+        submit.disabled = false;
+      }
+    });
+    refreshShared();
+    window.setInterval(refreshShared, 8000);
+    document.addEventListener('visibilitychange', refreshShared);
+  } else {
+    renderPause();
+    window.setInterval(() => {
+      if (!paused && !document.hidden && !document.querySelector('dialog[open]') && state.people.length) advance();
+    }, 16000);
+  }
 })();

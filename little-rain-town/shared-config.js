@@ -1,0 +1,4 @@
+window.RainTownConfig = {
+  projectUrl: '',
+  publishableKey: ''
+};
