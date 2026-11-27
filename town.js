@@ -93,8 +93,9 @@
   const markers = byId('map-residents');
   const portraitCache = new Map();
   const shared = window.SharedTown;
-  const inviteDialog = byId('invite-dialog');
-  let invite = shared?.loadInvite() ?? null;
+  const localResidents = shared ? load().people.filter(person => !starters.some(starter => starter.id === person.id)) : [];
+  let browserToken = null;
+  let identityReady = false;
   let playerId = null;
   let connected = false;
   let refreshing = false;
@@ -160,11 +161,12 @@
     if (!shared) return;
     const me = myResident();
     byId('shared-banner').hidden = false;
-    byId('shared-status').textContent = !connected
-      ? '共享小镇连接中，稍后会自动重试。'
-      : me ? `共享小镇 · 你的小人是「${me.name}」`
-        : playerId ? '共享小镇 · 可以创建你的小人' : '共享小镇 · 大家会看到同一批居民';
-    byId('shared-sign-out').hidden = !playerId;
+    let message = '共享小镇 · 每个浏览器可以捏一个小人';
+    if (!connected) message = '共享小镇连接中，稍后会自动重试。';
+    else if (!identityReady) message = '共享小镇 · 正在读取你的小人';
+    else if (!browserToken) message = '共享小镇 · 启用浏览器存储后可捏小人';
+    else if (me) message = `共享小镇 · 你的小人是「${me.name}」`;
+    byId('shared-status').textContent = message;
   }
 
   function applySnapshot(snapshot) {
@@ -184,10 +186,13 @@
     sharedStatus();
   }
 
-  function forgetInvite() {
-    invite = null;
-    playerId = null;
-    shared.storeInvite(null);
+  async function findBrowserResident() {
+    browserToken ??= await shared.loadBrowserToken();
+    if (browserToken) {
+      const ownership = await shared.call('find', { p_token: browserToken });
+      playerId = ownership.playerId;
+    }
+    identityReady = true;
     renderCards();
     sharedStatus();
   }
@@ -196,18 +201,13 @@
     if (refreshing || document.hidden) return;
     refreshing = true;
     try {
-      const snapshot = await shared.call(connected ? 'step' : 'read', connected ? { p_code: null, p_manual: false } : {});
+      const snapshot = await shared.call(connected ? 'step' : 'read', connected ? { p_token: null, p_manual: false } : {});
       applySnapshot(snapshot);
-      if (invite && !playerId) {
-        const attempted = invite;
+      if (!identityReady) {
         try {
-          const result = await shared.call('sign_in', { p_code: attempted });
-          if (invite !== attempted || playerId) return;
-          playerId = result.playerId;
-          renderCards();
-          sharedStatus();
-        } catch (error) {
-          if (invite === attempted && error.message === 'RAIN_INVITE_INVALID') forgetInvite();
+          await findBrowserResident();
+        } catch {
+          // Visitors can still read the shared town while ownership is unavailable.
         }
       }
     } catch {
@@ -384,10 +384,10 @@
     add.dataset.card = 'new';
     const plus = el('span', '', '＋');
     plus.setAttribute('aria-hidden', 'true');
-    const addLabel = shared ? myResident() ? ' 我的小人' : playerId ? ' 捏我的小人' : ' 用邀请码进镇'
+    const addLabel = shared ? myResident() ? ' 我的小人' : ' 捏我的小人'
       : state.people.length < maxPeople ? ' 捏个小人' : ' 小镇已住满';
     add.append(plus, addLabel);
-    add.disabled = shared ? !connected : state.people.length >= maxPeople;
+    add.disabled = shared ? !connected || !identityReady || !browserToken : state.people.length >= maxPeople;
     add.addEventListener('click', startResident);
     list.replaceChildren(...cards, add);
     if (focused) [...list.children].find(card => card.dataset.card === focused)?.focus({ preventScroll: true });
@@ -547,23 +547,20 @@
   }
 
   function startResident() {
-    if (shared && !playerId) {
-      if (!connected) return;
-      byId('invite-form').reset();
-      formError('invite-error');
-      inviteDialog.showModal();
-      return;
-    }
     showEditor(myResident()?.id);
   }
 
   function showEditor(id = null) {
     const person = state.people.find(item => item.id === id);
-    if (shared ? !connected || !playerId || (person && person.id !== playerId) : !person && state.people.length >= maxPeople) return;
+    if (shared ? !connected || !identityReady || !browserToken || (person && person.id !== playerId)
+      : !person && state.people.length >= maxPeople) return;
     editingId = person?.id ?? null;
     byId('resident-dialog-title').textContent = person ? '编辑小人' : '捏个小人';
     byId('create-tools').hidden = Boolean(person);
+    byId('import-local').hidden = Boolean(person) || !localResidents.length;
+    byId('import-local-resident').value = '';
     byId('remove-resident').hidden = !person || Boolean(shared);
+    byId('shared-resident-note').hidden = !shared;
     byId('save-resident').textContent = person ? '保存改动' : '搬进小镇';
     fillEditor(person ?? defaults);
     formError('resident-error');
@@ -644,6 +641,11 @@
     byId('place-directory').append(shortcut);
   }
   selectOptions(byId('meet-place'), Object.entries(places).map(([id, place]) => [id, place.name]));
+  selectOptions(byId('import-local-resident'), [['', '选择一个小人'], ...localResidents.map(person => [person.id, person.name])]);
+  byId('import-local-resident').addEventListener('change', event => {
+    const person = localResidents.find(resident => resident.id === event.target.value);
+    if (person) fillEditor(person);
+  });
 
   document.querySelector('[data-new]').addEventListener('click', startResident);
   document.querySelectorAll('[data-close]').forEach(button => button.addEventListener('click', () => button.closest('dialog').close()));
@@ -656,11 +658,11 @@
     if (!a || !b || a === b || !places[place]) return;
     if (shared) {
       const submit = event.submitter ?? event.target.querySelector('[type="submit"]');
-      if (!invite || submit.disabled) return;
+      if (!browserToken || submit.disabled) return;
       formError('meet-error');
       submit.disabled = true;
       try {
-        applySnapshot(await shared.call('meet', { p_code: invite, p_other: b.id, p_place: place }));
+        applySnapshot(await shared.call('meet', { p_token: browserToken, p_other: b.id, p_place: place }));
         meetDialog.close();
         notify(`${a.name}和${b.name}见面了`);
       } catch (error) {
@@ -683,11 +685,11 @@
     const button = event.submitter ?? event.target.querySelector('[type="submit"]');
     if (!person || !places[placeId] || button.disabled) return;
     if (shared) {
-      if (!invite || person.id !== playerId) return;
+      if (!browserToken || person.id !== playerId) return;
       button.disabled = true;
       formError('visit-error');
       try {
-        applySnapshot(await shared.call('visit', { p_code: invite, p_place: placeId }));
+        applySnapshot(await shared.call('visit', { p_token: browserToken, p_place: placeId }));
       } catch (error) {
         formError('visit-error', shared.message(error));
         return;
@@ -715,7 +717,7 @@
     const button = event.currentTarget;
     button.disabled = true;
     try {
-      applySnapshot(await shared.call('step', { p_code: invite, p_manual: true }));
+      applySnapshot(await shared.call('step', { p_token: browserToken, p_manual: true }));
     } catch (error) {
       notify(shared.message(error));
     } finally {
@@ -749,17 +751,25 @@
     }
     if (shared) {
       const submit = byId('save-resident');
-      if (!invite || submit.disabled) return;
+      if (!browserToken || submit.disabled) return;
       submit.disabled = true;
       try {
-        applySnapshot(await shared.call('save', { p_code: invite, p_profile: draft, p_create: !current }));
+        const snapshot = await shared.call('save', { p_token: browserToken, p_profile: draft, p_create: !current });
+        playerId = snapshot.playerId;
+        applySnapshot(snapshot);
+        renderCards();
         residentDialog.close();
         notify(current ? '改动已同步' : `欢迎${draft.name}！`);
       } catch (error) {
         if (error.message === 'RAIN_ALREADY_JOINED') {
-          await refreshShared();
-          residentDialog.close();
-          notify(shared.message(error));
+          try {
+            await findBrowserResident();
+            applySnapshot(await shared.call('read'));
+            residentDialog.close();
+            notify(shared.message(error));
+          } catch (refreshError) {
+            formError('resident-error', shared.message(refreshError));
+          }
         } else {
           formError('resident-error', shared.message(error));
         }
@@ -816,30 +826,6 @@
   if (shared) {
     byId('play-toggle').hidden = true;
     sharedStatus();
-    byId('shared-sign-out').addEventListener('click', forgetInvite);
-    byId('invite-form').addEventListener('submit', async event => {
-      event.preventDefault();
-      const submit = event.submitter ?? event.target.querySelector('[type="submit"]');
-      if (submit.disabled) return;
-      const code = new FormData(event.target).get('code').trim();
-      formError('invite-error');
-      submit.disabled = true;
-      try {
-        const result = await shared.call('sign_in', { p_code: code });
-        const snapshot = await shared.call('read');
-        playerId = result.playerId;
-        invite = code;
-        shared.storeInvite(code);
-        applySnapshot(snapshot);
-        renderCards();
-        inviteDialog.close();
-        startResident();
-      } catch (error) {
-        formError('invite-error', shared.message(error));
-      } finally {
-        submit.disabled = false;
-      }
-    });
     refreshShared();
     window.setInterval(refreshShared, 8000);
     document.addEventListener('visibilitychange', refreshShared);
