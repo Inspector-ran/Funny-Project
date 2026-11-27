@@ -16,7 +16,7 @@ jobs:
         env:
           POSTGRES_PASSWORD: rain-town-test-only
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U postgres"
           --health-interval 5s
           --health-timeout 3s
           --health-retries 8
@@ -24,7 +24,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-          fetch-depth: 3
+          fetch-depth: 0
       - name: Initialize test roles
         env:
           PG_CONTAINER: ${{ job.services.postgres.id }}
@@ -39,6 +39,9 @@ jobs:
           psql_check postgres < little-rain-town/backend/setup.sql
           psql_check postgres < little-rain-town/backend/setup.sql
           psql_check postgres < little-rain-town/backend/verify.sql
-          git show HEAD~2:little-rain-town/backend/setup.sql | psql_check upgraded
+          git show cd47117f40d63b83ab4ab964d66a2d45817968a2:little-rain-town/backend/setup.sql |
+            sed -e 's/clock_timestamp() - case when p_manual/clock_timestamp() - (case when p_manual/' \
+                -e "s/else interval '16 seconds' end then/else interval '16 seconds' end) then/" |
+            psql_check upgraded
           psql_check upgraded < little-rain-town/backend/setup.sql
           psql_check upgraded < little-rain-town/backend/verify.sql

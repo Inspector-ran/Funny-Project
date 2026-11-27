@@ -351,8 +351,8 @@ begin
     return rain_town.snapshot();
   end if;
   select w.last_tick into last_tick from rain_town.world w where w.singleton for update;
-  if last_tick > clock_timestamp() - case when p_manual is true
-    then interval '3 seconds' else interval '16 seconds' end then
+  if last_tick > clock_timestamp() - (case when p_manual is true
+    then interval '3 seconds' else interval '16 seconds' end) then
     return rain_town.snapshot();
   end if;
   next_turn := rain_town.advance_clock();
