@@ -4,42 +4,64 @@
     temper: {
       warm: '主动热情', quiet: '慢热安静', curious: '好奇爱问', dreamy: '爱发呆'
     },
-    hair: { short: '短短的', sweep: '侧分', long: '齐肩发', buns: '双团子' },
+    hair: { short: '短短的', sweep: '侧分', long: '齐肩发', buns: '双团子', bob: '齐耳波波', curly: '蓬蓬卷', pony: '高马尾', braids: '双麻花' },
     hairColor: {
       brown: { label: '栗棕', color: '#916655' },
       black: { label: '墨黑', color: '#48423f' },
       orange: { label: '蜂蜜橘', color: '#ca8e57' },
-      plum: { label: '梅子紫', color: '#816479' }
+      plum: { label: '梅子紫', color: '#816479' },
+      pink: { label: '桃子粉', color: '#d7909e' },
+      blue: { label: '海盐蓝', color: '#6d9bb5' },
+      ash: { label: '雾银灰', color: '#b9b7b3' },
+      honey: { label: '杏仁金', color: '#dfbb73' }
     },
     shirt: {
       moss: { label: '苔藓绿', color: '#8ca275', bg: '#e9edde' },
       rose: { label: '莓果粉', color: '#d89389', bg: '#f3e7dd' },
       gold: { label: '蛋黄黄', color: '#e7b66d', bg: '#f5ead3' },
       teal: { label: '雨伞蓝', color: '#7da3a5', bg: '#e1edeb' },
-      violet: { label: '丁香紫', color: '#a696c4', bg: '#eee7f1' }
+      violet: { label: '丁香紫', color: '#a696c4', bg: '#eee7f1' },
+      mint: { label: '薄荷绿', color: '#a4c8ae', bg: '#e6f0e5' },
+      navy: { label: '深海蓝', color: '#647d9a', bg: '#e3e9f0' },
+      cream: { label: '奶油白', color: '#f2e2b5', bg: '#f1eddb' },
+      cherry: { label: '樱桃红', color: '#bf6f74', bg: '#f3e2e3' }
     },
     skin: {
       peach: { label: '蜜桃', color: '#f1caa5' },
       sand: { label: '暖沙', color: '#dbaa81' },
       cocoa: { label: '可可', color: '#ac775c' },
-      pearl: { label: '奶油', color: '#f8dac1' }
+      pearl: { label: '奶油', color: '#f8dac1' },
+      biscuit: { label: '烤饼干', color: '#c99066' },
+      walnut: { label: '胡桃', color: '#805743' }
     },
+    expression: { gentle: '浅浅笑', happy: '笑眯眯', sleepy: '困困脸', surprised: '呆圆眼', cheeky: '得意脸' },
+    outfit: { tee: '圆领衫', overalls: '背带裤', raincoat: '雨衣', scarf: '围巾毛衣', sailor: '水手领' },
+    accessory: { none: '无', glasses: '圆眼镜', beret: '贝雷帽', ribbon: '大蝴蝶结', flower: '小花发夹', headphones: '耳机', cat: '猫耳帽' },
     hobby: {
-      reading: '读书', baking: '做点心', walking: '散步', drawing: '画画', puzzles: '琢磨题目'
+      reading: '读书', baking: '做点心', walking: '散步', drawing: '画画', puzzles: '琢磨题目',
+      gardening: '种花', letters: '写明信片', camping: '露营', stars: '看星星'
     }
   };
   const places = {
-    bakery: { name: '云朵面包房', icon: '☁', pin: [225,231], spots: [[161,266],[294,277],[220,284],[267,216]], note: '刚出炉的面包总会让路过的人慢下来。' },
-    library: { name: '雨伞图书屋', icon: '▤', pin: [665,225], spots: [[585,258],[736,257],[665,276],[603,213]], note: '窗边有晒得到太阳的位置，书架背后还有一张小桌。' },
-    square: { name: '喷泉广场', icon: '✿', pin: [447,347], spots: [[380,312],[511,324],[460,262],[387,365]], note: '树荫在地上慢慢转，路过的人很容易在这里碰见熟面孔。' },
-    bench: { name: '河畔长椅', icon: '≈', pin: [764,395], spots: [[685,411],[818,375],[739,354],[816,415]], note: '坐下来能听见河水，也适合找人说两句悄悄话。' }
+    bakery: { name: '云朵面包房', icon: '☁', pin: [225,231], spots: [[161,266],[294,277],[220,284],[267,216]], note: '刚出炉的面包总会让路过的人慢下来。', activity: '拎着一小袋热面包出门，袋子上印了一朵云。' },
+    library: { name: '雨伞图书屋', icon: '▤', pin: [665,225], spots: [[585,258],[736,257],[665,276],[603,213]], note: '窗边有晒得到太阳的位置，书架背后还有一张小桌。', activity: '在一本旧故事书里发现了夹着的银杏叶。' },
+    square: { name: '喷泉广场', icon: '✿', pin: [447,347], spots: [[380,312],[511,324],[460,262],[387,365]], note: '树荫在地上慢慢转，路过的人很容易在这里碰见熟面孔。', activity: '绕着喷泉走了一圈，发现水珠里有一道小彩虹。' },
+    bench: { name: '河畔长椅', icon: '≈', pin: [764,395], spots: [[685,411],[818,375],[739,354],[816,415]], note: '坐下来能听见河水，也适合找人说两句悄悄话。', activity: '看一片树叶顺着河水漂远，然后在长椅上伸了个懒腰。' },
+    garden: { name: '野花温室', icon: '✾', pin: [430,194], spots: [[354,185],[504,190],[475,228],[398,221]], note: '玻璃屋里摆满了花盆，门边放着一把小水壶。', activity: '给一株还没开花的铃兰浇了水，插上一块写着名字的木牌。' },
+    post: { name: '猫咪邮局', icon: '✉', pin: [809,202], spots: [[783,172],[865,214],[772,243],[850,248]], note: '邮筒旁有一只黄猫，桌上放着可以带走的明信片。', activity: '给未来的自己寄出一张明信片，邮戳是一个小猫爪。' },
+    camp: { name: '萤火露营地', icon: '△', pin: [127,367], spots: [[60,353],[188,345],[87,382],[158,384]], note: '河湾边扎着两顶帐篷，沿着灯串就能找到野餐桌。', activity: '分了一串烤棉花糖，数着帐篷旁一闪一闪的小灯。' },
+    deck: { name: '星星观景台', icon: '✦', pin: [344,519], spots: [[268,501],[409,511],[307,488],[379,497]], note: '过桥走到对岸，木台上有一架望远镜和一本星图。', activity: '翻开星图找到了北斗七星，还在旁边画了一枚小小的月亮。' }
   };
   const hobbies = {
     reading: { place: 'library', topic: '最近读到的一页', action: '选了本薄薄的故事书，在窗边慢慢翻。' },
     baking: { place: 'bakery', topic: '如何把奶油夹进面包', action: '尝试把面团捏成小云朵，烤出来却更像一块石头。' },
     walking: { place: 'bench', topic: '哪条小路最适合发呆', action: '沿河走了一段，踩过了三片叶子。' },
     drawing: { place: 'square', topic: '怎样把喷泉画出水声', action: '拿出画本，悄悄画下了路过的小鸟。' },
-    puzzles: { place: 'library', topic: '一道可以慢慢想的题', action: '在纸上画了几个小图，突然想到了下一步。' }
+    puzzles: { place: 'library', topic: '一道可以慢慢想的题', action: '在纸上画了几个小图，突然想到了下一步。' },
+    gardening: { place: 'garden', topic: '铃兰什么时候开花', action: '把一排新花盆挪到了有光的窗边。' },
+    letters: { place: 'post', topic: '下一张明信片要寄给谁', action: '挑了一张猫爪明信片，写了句「今天也记得散散步」。' },
+    camping: { place: 'camp', topic: '野餐要带什么点心', action: '在帐篷边摊开一张格子野餐垫，摆上了小饼干。' },
+    stars: { place: 'deck', topic: '北斗七星和小熊座的位置', action: '把望远镜对准河对面的天空，在本子上描了一页星星。' }
   };
   const greetings = {
     warm: '先挥了挥手，主动聊起',
@@ -53,6 +75,8 @@
     { id: 'xiaoli', name: '小栗', temper: 'curious', hair: 'short', hairColor: 'plum', shirt: 'teal', skin: 'sand', hobby: 'reading', phrase: '咦，这是为什么？', place: 'library', mood: '挑到一本好书' }
   ];
   const key = 'little-rain-town-v1';
+  const appearanceDefaults = { expression: 'gentle', outfit: 'tee', accessory: 'none' };
+  const portraitProperties = ['hair', 'hairColor', 'skin', 'shirt', 'expression', 'outfit', 'accessory'];
   const maxPeople = 16;
   const minuteStep = 20;
   const makeId = () => window.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -62,6 +86,7 @@
   const residentDialog = byId('resident-dialog');
   const detailDialog = byId('detail-dialog');
   const meetDialog = byId('meet-dialog');
+  const visitDialog = byId('visit-dialog');
   const residentForm = byId('resident-form');
   const eventList = byId('event-list');
   const bondList = byId('bond-list');
@@ -76,13 +101,14 @@
   let state = shared ? { ...initialState(), people: [], bonds: {}, events: [], revision: -1 } : load();
   let paused = Boolean(state.paused);
   let editingId = null;
+  let visitingPlace = null;
   let toastTimer;
   let lastLighting = '';
 
   function initialState() {
     return {
       version: 1, minutes: 540, turn: 0, paused: false,
-      people: starters.map(person => ({ ...person })),
+      people: starters.map(person => ({ ...appearanceDefaults, ...person })),
       bonds: { [pairKey(starters[0], starters[1])]: 18 },
       events: [
         { time: 540, kind: 'solo', title: '小栗选了一本书', body: '雨伞图书屋的窗边，刚好有一张空椅子。' },
@@ -95,6 +121,7 @@
   function load() {
     try {
       const value = JSON.parse(window.localStorage.getItem(key));
+      if (Array.isArray(value?.people)) value.people = value.people.map(person => ({ ...appearanceDefaults, ...person }));
       if (value?.version === 1 && Number.isSafeInteger(value.minutes) && value.minutes >= 0 &&
         Number.isSafeInteger(value.turn) && Array.isArray(value.people) && value.people.length <= maxPeople &&
         value.people.every(person => typeof person.name === 'string' && typeof person.id === 'string' && places[person.place] &&
@@ -145,8 +172,8 @@
     const reconnecting = !connected;
     connected = true;
     if (snapshot.revision > state.revision) {
-      const profileTraits = ({ id, name, temper, hair, hairColor, shirt, skin, hobby }) =>
-        [id, name, temper, hair, hairColor, shirt, skin, hobby];
+      snapshot.people = snapshot.people.map(person => ({ ...appearanceDefaults, ...person }));
+      const profileTraits = person => [person.id, person.name, person.temper, person.hobby, ...portraitProperties.map(prop => person[prop])];
       const cardsChanged = JSON.stringify(snapshot.people.map(profileTraits)) !== JSON.stringify(state.people.map(profileTraits));
       state = snapshot;
       update(cardsChanged || reconnecting);
@@ -201,8 +228,11 @@
   }
 
   function portrait(person) {
-    const style = [person.hair, person.hairColor, person.shirt, person.skin].join('/');
-    if (!portraitCache.has(style)) portraitCache.set(style, TownArt.avatar(person, options));
+    const style = portraitProperties.map(property => person[property]).join('/');
+    if (!portraitCache.has(style)) {
+      if (portraitCache.size >= 192) portraitCache.delete(portraitCache.keys().next().value);
+      portraitCache.set(style, TownArt.avatar(person, options));
+    }
     return portraitCache.get(style);
   }
 
@@ -265,6 +295,15 @@
     log('solo', `${person.name}去了${places[hobby.place].name}`, hobby.action + phrase);
   }
 
+  function visit(person, placeId) {
+    const place = places[placeId];
+    tickClock();
+    person.place = placeId;
+    person.mood = '在附近逛逛';
+    log('solo', `${person.name}去了${place.name}`, place.activity);
+    update();
+  }
+
   function advance() {
     tickClock();
     const a = pick(state.people);
@@ -319,8 +358,8 @@
       const spots = places[person.place].spots;
       const [x, y] = spots[index % spots.length];
       const shift = Math.floor(index / spots.length);
-      marker.style.left = `${(x + shift * 13) / 9}%`;
-      marker.style.top = `${(y + shift * 11) / 5.4}%`;
+      marker.style.left = `${Math.max(27, Math.min(x + shift * 13, 873)) / 9}%`;
+      marker.style.top = `${Math.min(y + shift * 11, 527) / 5.4}%`;
       marker.style.zIndex = String(Math.round(y + shift * 11));
     });
     [...markers.children].filter(marker => marker.dataset.active === 'false').forEach(marker => marker.remove());
@@ -471,13 +510,16 @@
     } else {
       content.append(el('p', 'empty', '现在这里很安静。'));
     }
-    const invite = action('约在这里见面', 'primary', () => closeDetailThen(() => showMeeting(id)));
-    invite.disabled = state.people.length < 2 || Boolean(shared && (!connected || !myResident()));
-    byId('detail-actions').replaceChildren(invite);
+    const canVisit = state.people.length > 0 && (!shared || connected && myResident());
+    const go = action('带小人去这里', 'primary', () => closeDetailThen(() => showVisit(id)));
+    const meeting = action('约在这里见面', 'soft', () => closeDetailThen(() => showMeeting(id)));
+    go.disabled = !canVisit;
+    meeting.disabled = !canVisit || state.people.length < 2;
+    byId('detail-actions').replaceChildren(meeting, go);
     detailDialog.showModal();
   }
 
-  const defaults = { name: '', temper: 'warm', hair: 'short', hairColor: 'brown', shirt: 'moss', skin: 'peach', hobby: 'walking', phrase: '' };
+  const defaults = { ...appearanceDefaults, name: '', temper: 'warm', hair: 'short', hairColor: 'brown', shirt: 'moss', skin: 'peach', hobby: 'walking', phrase: '' };
 
   function formPerson() {
     return Object.fromEntries(new FormData(residentForm));
@@ -561,6 +603,18 @@
     meetDialog.showModal();
   }
 
+  function showVisit(id) {
+    if (shared && !connected) return;
+    const visitors = shared ? [myResident()].filter(Boolean) : state.people;
+    if (!visitors.length) return;
+    visitingPlace = id;
+    byId('visit-title').textContent = `去${places[id].name}`;
+    byId('visit-note').textContent = places[id].note;
+    selectOptions(byId('visit-resident'), visitors.map(person => [person.id, person.name]));
+    formError('visit-error');
+    visitDialog.showModal();
+  }
+
   function renderPause() {
     const button = byId('play-toggle');
     button.textContent = paused ? '▷ 继续' : 'Ⅱ 暂停';
@@ -579,10 +633,15 @@
     button.type = 'button';
     const icon = el('span', 'place-glyph', place.icon);
     icon.setAttribute('aria-hidden', 'true');
-    button.append(icon, place.name);
+    button.setAttribute('aria-label', place.name);
+    button.append(icon, el('span', 'place-name', place.name));
     button.addEventListener('click', () => showPlace(id));
     marker.append(button);
     byId('map-places').append(marker);
+    const shortcut = el('button', '', place.name);
+    shortcut.type = 'button';
+    shortcut.addEventListener('click', () => showPlace(id));
+    byId('place-directory').append(shortcut);
   }
   selectOptions(byId('meet-place'), Object.entries(places).map(([id, place]) => [id, place.name]));
 
@@ -617,6 +676,30 @@
     update();
     notify(`${a.name}和${b.name}见面了`);
   });
+  byId('visit-form').addEventListener('submit', async event => {
+    event.preventDefault();
+    const placeId = visitingPlace;
+    const person = state.people.find(resident => resident.id === byId('visit-resident').value);
+    const button = event.submitter ?? event.target.querySelector('[type="submit"]');
+    if (!person || !places[placeId] || button.disabled) return;
+    if (shared) {
+      if (!invite || person.id !== playerId) return;
+      button.disabled = true;
+      formError('visit-error');
+      try {
+        applySnapshot(await shared.call('visit', { p_code: invite, p_place: placeId }));
+      } catch (error) {
+        formError('visit-error', shared.message(error));
+        return;
+      } finally {
+        button.disabled = false;
+      }
+    } else {
+      visit(person, placeId);
+    }
+    visitDialog.close();
+    notify(`${person.name}去${places[placeId].name}啦`);
+  });
   byId('play-toggle').addEventListener('click', () => {
     if (shared) return;
     paused = !paused;
@@ -645,7 +728,7 @@
     fillEditor({ ...defaults, ...traits, name: pick(names) ?? '', phrase: pick(['今天有点好玩。', '待会儿见！', '让我想一想。']) });
   });
   byId('personal-resident').addEventListener('click', () => {
-    fillEditor({ ...defaults, name: '我的小人', temper: 'curious', hair: 'buns', shirt: 'teal', hobby: 'puzzles', phrase: '吼吼，要开始学习了喵！' });
+    fillEditor({ ...defaults, name: '我的小人', temper: 'curious', hair: 'buns', shirt: 'teal', accessory: 'flower', hobby: 'puzzles', phrase: '吼吼，要开始学习了喵！' });
   });
   residentForm.addEventListener('input', () => {
     byId('resident-name').setCustomValidity('');

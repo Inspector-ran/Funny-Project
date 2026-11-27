@@ -15,9 +15,13 @@ create table if not exists rain_town.residents (
   owner_id uuid unique references rain_town.invites (id),
   name text unique not null check (char_length(name) between 1 and 12),
   appearance jsonb not null,
-  place text not null check (place in ('bakery', 'library', 'square', 'bench')),
+  place text not null,
   mood text not null
 );
+
+alter table rain_town.residents drop constraint if exists residents_place_check;
+alter table rain_town.residents add constraint residents_place_check
+  check (place in ('bakery', 'library', 'square', 'bench', 'garden', 'post', 'camp', 'deck'));
 
 create table if not exists rain_town.world (
   singleton boolean primary key default true check (singleton),
@@ -107,12 +111,27 @@ as $$
   returning turn;
 $$;
 
+create or replace function rain_town.place_info(p_place text)
+returns table (name text, activity text)
+language sql immutable set search_path = ''
+as $$
+  select p.name, p.activity from (values
+    ('bakery', '云朵面包房', '拎着一小袋热面包出门，袋子上印了一朵云。'),
+    ('library', '雨伞图书屋', '在一本旧故事书里发现了夹着的银杏叶。'),
+    ('square', '喷泉广场', '绕着喷泉走了一圈，发现水珠里有一道小彩虹。'),
+    ('bench', '河畔长椅', '看一片树叶顺着河水漂远，然后在长椅上伸了个懒腰。'),
+    ('garden', '野花温室', '给一株还没开花的铃兰浇了水，插上一块写着名字的木牌。'),
+    ('post', '猫咪邮局', '给未来的自己寄出一张明信片，邮戳是一个小猫爪。'),
+    ('camp', '萤火露营地', '分了一串烤棉花糖，数着帐篷旁一闪一闪的小灯。'),
+    ('deck', '星星观景台', '翻开星图找到了北斗七星，还在旁边画了一枚小小的月亮。')
+  ) as p(key, name, activity) where p.key = p_place;
+$$;
+
 create or replace function rain_town.place_name(p_place text)
 returns text
 language sql immutable set search_path = ''
 as $$
-  select case p_place when 'bakery' then '云朵面包房' when 'library' then '雨伞图书屋'
-    when 'square' then '喷泉广场' when 'bench' then '河畔长椅' end;
+  select p.name from rain_town.place_info(p_place) p;
 $$;
 
 create or replace function rain_town.hobby_info(p_hobby text)
@@ -124,7 +143,11 @@ as $$
     ('baking', '做点心', 'bakery', '如何把奶油夹进面包', '试着把面团捏成小云朵，烤出来却更像一块石头。'),
     ('walking', '散步', 'bench', '哪条小路最适合发呆', '沿河走了一段，踩过了三片叶子。'),
     ('drawing', '画画', 'square', '怎样把喷泉画出水声', '拿出画本，悄悄画下了路过的小鸟。'),
-    ('puzzles', '琢磨题目', 'library', '一道可以慢慢想的题', '在纸上画了几个小图，突然想到了下一步。')
+    ('puzzles', '琢磨题目', 'library', '一道可以慢慢想的题', '在纸上画了几个小图，突然想到了下一步。'),
+    ('gardening', '种花', 'garden', '铃兰什么时候开花', '把一排新花盆挪到了有光的窗边。'),
+    ('letters', '写明信片', 'post', '下一张明信片要寄给谁', '挑了一张猫爪明信片，写了句「今天也记得散散步」。'),
+    ('camping', '露营', 'camp', '野餐要带什么点心', '在帐篷边摊开一张格子野餐垫，摆上了小饼干。'),
+    ('stars', '看星星', 'deck', '北斗七星和小熊座的位置', '把望远镜对准河对面的天空，在本子上描了一页星星。')
   ) as h(key, label, place, topic, activity) where h.key = p_hobby;
 $$;
 
@@ -197,30 +220,35 @@ begin
     and char_length(nickname) between 1 and 12
     and char_length(phrase) <= 36
     and (p_profile ->> 'temper') in ('warm', 'quiet', 'curious', 'dreamy')
-    and (p_profile ->> 'hair') in ('short', 'sweep', 'long', 'buns')
-    and (p_profile ->> 'hairColor') in ('brown', 'black', 'orange', 'plum')
-    and (p_profile ->> 'shirt') in ('moss', 'rose', 'gold', 'teal', 'violet')
-    and (p_profile ->> 'skin') in ('peach', 'sand', 'cocoa', 'pearl')
-    and (p_profile ->> 'hobby') in ('reading', 'baking', 'walking', 'drawing', 'puzzles')
+    and (p_profile ->> 'hair') in ('short', 'sweep', 'long', 'buns', 'bob', 'curly', 'pony', 'braids')
+    and (p_profile ->> 'hairColor') in ('brown', 'black', 'orange', 'plum', 'pink', 'blue', 'ash', 'honey')
+    and (p_profile ->> 'shirt') in ('moss', 'rose', 'gold', 'teal', 'violet', 'mint', 'navy', 'cream', 'cherry')
+    and (p_profile ->> 'skin') in ('peach', 'sand', 'cocoa', 'pearl', 'biscuit', 'walnut')
+    and coalesce(p_profile ->> 'expression', 'gentle') in ('gentle', 'happy', 'sleepy', 'surprised', 'cheeky')
+    and coalesce(p_profile ->> 'outfit', 'tee') in ('tee', 'overalls', 'raincoat', 'scarf', 'sailor')
+    and coalesce(p_profile ->> 'accessory', 'none') in ('none', 'glasses', 'beret', 'ribbon', 'flower', 'headphones', 'cat')
+    and exists (select 1 from rain_town.hobby_info(p_profile ->> 'hobby'))
     and p_create is not null, false
   ) then
     raise exception 'RAIN_PROFILE_INVALID';
   end if;
-  clean_profile := jsonb_build_object(
+  clean_profile := jsonb_strip_nulls(jsonb_build_object(
     'temper', p_profile ->> 'temper', 'hair', p_profile ->> 'hair',
     'hairColor', p_profile ->> 'hairColor', 'shirt', p_profile ->> 'shirt',
-    'skin', p_profile ->> 'skin', 'hobby', p_profile ->> 'hobby', 'phrase', phrase
-  );
+    'skin', p_profile ->> 'skin', 'hobby', p_profile ->> 'hobby', 'phrase', phrase,
+    'expression', p_profile ->> 'expression', 'outfit', p_profile ->> 'outfit', 'accessory', p_profile ->> 'accessory'
+  ));
   perform 1 from rain_town.world w where w.singleton for update;
   if p_create then
     if exists (select 1 from rain_town.residents r where r.owner_id = player_id) then
       raise exception 'RAIN_ALREADY_JOINED';
     end if;
     insert into rain_town.residents (id, owner_id, name, appearance, place, mood)
-    values (player_id::text, player_id, nickname, clean_profile, 'square', '正在认路');
+    values (player_id::text, player_id, nickname,
+      '{"expression":"gentle","outfit":"tee","accessory":"none"}'::jsonb || clean_profile, 'square', '正在认路');
     perform rain_town.add_event('arrival', nickname || '搬来啦', '拿着行李到达了喷泉广场。');
   else
-    update rain_town.residents r set name = nickname, appearance = clean_profile
+    update rain_town.residents r set name = nickname, appearance = r.appearance || clean_profile
     where r.owner_id = player_id;
     if not found then raise exception 'RAIN_RESIDENT_MISSING'; end if;
     update rain_town.world w set revision = w.revision + 1 where w.singleton;
@@ -254,6 +282,30 @@ begin
   if not found then raise exception 'RAIN_ACTION_LIMIT'; end if;
   next_turn := rain_town.advance_clock();
   perform rain_town.record_meeting(first_resident, second_resident, p_place, next_turn);
+  return rain_town.snapshot();
+end;
+$$;
+
+create or replace function public.rain_town_visit(p_code text, p_place text)
+returns jsonb
+language plpgsql volatile security definer set search_path = ''
+as $$
+declare
+  player_id uuid := rain_town.player(p_code);
+  place_info record;
+  nickname text;
+begin
+  select * into place_info from rain_town.place_info(p_place);
+  if not found then raise exception 'RAIN_PLACE_INVALID'; end if;
+  perform 1 from rain_town.world w where w.singleton for update;
+  update rain_town.invites i set last_action = clock_timestamp() where i.id = player_id
+  and (i.last_action is null or i.last_action < clock_timestamp() - interval '2 seconds');
+  if not found then raise exception 'RAIN_ACTION_LIMIT'; end if;
+  update rain_town.residents r set place = p_place, mood = '在附近逛逛'
+  where r.owner_id = player_id returning r.name into nickname;
+  if not found then raise exception 'RAIN_RESIDENT_MISSING'; end if;
+  perform rain_town.advance_clock();
+  perform rain_town.add_event('solo', nickname || '去了' || place_info.name, place_info.activity);
   return rain_town.snapshot();
 end;
 $$;
@@ -324,10 +376,10 @@ revoke all on all tables in schema rain_town from public, anon, authenticated;
 revoke all on all functions in schema rain_town from public, anon, authenticated;
 revoke all on function public.rain_town_read(), public.rain_town_sign_in(text),
   public.rain_town_save(text, jsonb, boolean), public.rain_town_meet(text, text, text),
-  public.rain_town_step(text, boolean) from public;
+  public.rain_town_visit(text, text), public.rain_town_step(text, boolean) from public;
 grant execute on function public.rain_town_read(), public.rain_town_sign_in(text),
   public.rain_town_save(text, jsonb, boolean), public.rain_town_meet(text, text, text),
-  public.rain_town_step(text, boolean) to anon, authenticated;
+  public.rain_town_visit(text, text), public.rain_town_step(text, boolean) to anon, authenticated;
 
 notify pgrst, 'reload schema';
 commit;

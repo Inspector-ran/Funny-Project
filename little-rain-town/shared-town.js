@@ -11,7 +11,8 @@
     RAIN_NAME_TAKEN: '镇上已经有这个名字了，换一个试试。',
     RAIN_RESIDENT_MISSING: '先捏好自己的小人，再使用这个功能。',
     RAIN_MEETING_INVALID: '请重新选择见面对象和地点。',
-    RAIN_ACTION_LIMIT: '刚安排过一场见面，请稍后再试。',
+    RAIN_PLACE_INVALID: '这个地点暂时去不了，请重新选择。',
+    RAIN_ACTION_LIMIT: '刚安排过一次活动，请稍后再试。',
     RAIN_ALREADY_JOINED: '这个邀请码已经认领了一个小人。'
   };
 
