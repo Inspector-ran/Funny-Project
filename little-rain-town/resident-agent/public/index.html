@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>居民观察室 · 毛毛雨小镇</title>
+  <link rel="stylesheet" href="/prototype.css">
+  <script src="/world.js" defer></script>
+  <script src="/view.js" defer></script>
+</head>
+<body>
+  <header><div class="masthead"><span class="umbrella" aria-hidden="true">☂</span><div><p>毛毛雨小镇</p><h1>居民观察室</h1></div></div><p class="clock" id="clock">等小镇醒来</p></header>
+  <main>
+    <div class="scene">
+      <section class="map-panel" aria-labelledby="map-title">
+        <div class="heading"><h2 id="map-title">小镇地图</h2><span id="connection" role="status">正在读取居民状态</span></div>
+        <div class="map"><canvas width="900" height="540" aria-hidden="true"></canvas><div id="map-labels"></div></div>
+      </section>
+      <section class="diary" aria-labelledby="diary-title">
+        <div class="heading"><h2 id="diary-title">小镇日记</h2></div>
+        <p id="mode" class="mode">等待第一条记录</p>
+        <ol id="events"><li>小镇醒来以后，居民的行动和聊天会记在这里。</li></ol>
+      </section>
+    </div>
+    <section class="residents-panel" aria-labelledby="residents-title">
+      <div class="heading"><h2 id="residents-title">居民档案</h2><span id="friendship"></span></div>
+      <div id="residents"></div>
+    </section>
+  </main>
+  <template id="resident-card">
+    <article class="resident">
+      <div class="resident-title"><img width="64" height="64" alt=""><div><h3></h3><p class="mood"></p></div></div>
+      <p class="activity"></p>
+      <dl><div><dt>性格</dt><dd class="temperament"></dd></div><div><dt>长期愿望</dt><dd class="wish"></dd></div><div><dt>愿望进度</dt><dd class="progress"></dd></div></dl>
+      <details><summary>最近的记忆</summary><ul></ul></details>
+    </article>
+  </template>
+</body>
+</html>
