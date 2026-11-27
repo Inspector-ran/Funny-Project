@@ -3,22 +3,24 @@ begin;
 create schema if not exists rain_town;
 revoke all on schema rain_town from public, anon, authenticated;
 
-create table if not exists rain_town.invites (
+create table if not exists rain_town.browser_players (
   id uuid primary key default gen_random_uuid(),
-  code_hash bytea unique not null,
+  token_hash bytea unique not null,
   last_action timestamptz
 );
 
 create table if not exists rain_town.residents (
   position bigint generated always as identity primary key,
   id text unique not null,
-  owner_id uuid unique references rain_town.invites (id),
+  browser_id uuid unique references rain_town.browser_players (id),
   name text unique not null check (char_length(name) between 1 and 12),
   appearance jsonb not null,
   place text not null,
   mood text not null
 );
 
+alter table rain_town.residents add column if not exists browser_id uuid unique
+  references rain_town.browser_players (id);
 alter table rain_town.residents drop constraint if exists residents_place_check;
 alter table rain_town.residents add constraint residents_place_check
   check (place in ('bakery', 'library', 'square', 'bench', 'garden', 'post', 'camp', 'deck'));
@@ -37,7 +39,7 @@ create table if not exists rain_town.world (
   ]'
 );
 
-alter table rain_town.invites enable row level security;
+alter table rain_town.browser_players enable row level security;
 alter table rain_town.residents enable row level security;
 alter table rain_town.world enable row level security;
 
@@ -48,22 +50,23 @@ insert into rain_town.residents (id, name, appearance, place, mood) values
   ('xiaoli', '小栗', '{"temper":"curious","hair":"short","hairColor":"plum","shirt":"teal","skin":"sand","hobby":"reading","phrase":"咦，这是为什么？"}', 'library', '挑到一本好书')
 on conflict (id) do nothing;
 
-create or replace function rain_town.player(p_code text)
-returns uuid
-language plpgsql stable set search_path = ''
+create or replace function rain_town.token_hash(p_token text)
+returns bytea
+language plpgsql immutable set search_path = ''
 as $$
-declare
-  normalized text := replace(lower(btrim(p_code)), '-', '');
-  player_id uuid;
 begin
-  if normalized is null or normalized !~ '^[0-9a-f]{32}$' then
-    raise exception 'RAIN_INVITE_INVALID';
+  if p_token is null or length(p_token) <> 64 or p_token !~ '^[0-9a-f]{64}$' then
+    raise exception 'RAIN_BROWSER_INVALID';
   end if;
-  select i.id into player_id from rain_town.invites i
-  where i.code_hash = sha256(convert_to(normalized, 'UTF8'));
-  if player_id is null then raise exception 'RAIN_INVITE_INVALID'; end if;
-  return player_id;
+  return sha256(convert_to(p_token, 'UTF8'));
 end;
+$$;
+
+create or replace function rain_town.browser_player(p_token text)
+returns uuid
+language sql stable set search_path = ''
+as $$
+  select b.id from rain_town.browser_players b where b.token_hash = rain_town.token_hash(p_token);
 $$;
 
 create or replace function rain_town.snapshot()
@@ -200,17 +203,26 @@ returns jsonb
 language sql volatile security definer set search_path = ''
 as $$ select rain_town.snapshot(); $$;
 
-create or replace function public.rain_town_sign_in(p_code text)
+drop function if exists public.rain_town_sign_in(text);
+drop function if exists public.rain_town_save(text, jsonb, boolean);
+drop function if exists public.rain_town_meet(text, text, text);
+drop function if exists public.rain_town_visit(text, text);
+drop function if exists public.rain_town_step(text, boolean);
+drop function if exists rain_town.issue_invites(integer);
+drop function if exists rain_town.player(text);
+
+create or replace function public.rain_town_find(p_token text)
 returns jsonb
 language sql stable security definer set search_path = ''
-as $$ select jsonb_build_object('playerId', rain_town.player(p_code)); $$;
+as $$ select jsonb_build_object('playerId', rain_town.browser_player(p_token)); $$;
 
-create or replace function public.rain_town_save(p_code text, p_profile jsonb, p_create boolean)
+create or replace function public.rain_town_save(p_token text, p_profile jsonb, p_create boolean)
 returns jsonb
 language plpgsql volatile security definer set search_path = ''
 as $$
 declare
-  player_id uuid := rain_town.player(p_code);
+  browser_hash bytea := rain_town.token_hash(p_token);
+  player_id uuid;
   nickname text := btrim(p_profile ->> 'name');
   phrase text := btrim(coalesce(p_profile ->> 'phrase', ''));
   clean_profile jsonb;
@@ -240,31 +252,35 @@ begin
   ));
   perform 1 from rain_town.world w where w.singleton for update;
   if p_create then
-    if exists (select 1 from rain_town.residents r where r.owner_id = player_id) then
+    insert into rain_town.browser_players (token_hash)
+    values (browser_hash) on conflict (token_hash) do nothing;
+    select b.id into player_id from rain_town.browser_players b where b.token_hash = browser_hash;
+    if exists (select 1 from rain_town.residents r where r.browser_id = player_id) then
       raise exception 'RAIN_ALREADY_JOINED';
     end if;
-    insert into rain_town.residents (id, owner_id, name, appearance, place, mood)
+    insert into rain_town.residents (id, browser_id, name, appearance, place, mood)
     values (player_id::text, player_id, nickname,
       '{"expression":"gentle","outfit":"tee","accessory":"none"}'::jsonb || clean_profile, 'square', '正在认路');
     perform rain_town.add_event('arrival', nickname || '搬来啦', '拿着行李到达了喷泉广场。');
   else
+    select b.id into player_id from rain_town.browser_players b where b.token_hash = browser_hash;
     update rain_town.residents r set name = nickname, appearance = r.appearance || clean_profile
-    where r.owner_id = player_id;
+    where r.browser_id = player_id;
     if not found then raise exception 'RAIN_RESIDENT_MISSING'; end if;
     update rain_town.world w set revision = w.revision + 1 where w.singleton;
   end if;
-  return rain_town.snapshot();
+  return rain_town.snapshot() || jsonb_build_object('playerId', player_id);
 exception when unique_violation then
   raise exception 'RAIN_NAME_TAKEN';
 end;
 $$;
 
-create or replace function public.rain_town_meet(p_code text, p_other text, p_place text)
+create or replace function public.rain_town_meet(p_token text, p_other text, p_place text)
 returns jsonb
 language plpgsql volatile security definer set search_path = ''
 as $$
 declare
-  player_id uuid := rain_town.player(p_code);
+  player_id uuid := rain_town.browser_player(p_token);
   first_resident rain_town.residents;
   second_resident rain_town.residents;
   next_turn integer;
@@ -273,12 +289,12 @@ begin
     raise exception 'RAIN_MEETING_INVALID';
   end if;
   perform 1 from rain_town.world w where w.singleton for update;
-  select r.* into first_resident from rain_town.residents r where r.owner_id = player_id;
+  select r.* into first_resident from rain_town.residents r where r.browser_id = player_id;
   if not found then raise exception 'RAIN_RESIDENT_MISSING'; end if;
   select r.* into second_resident from rain_town.residents r where r.id = p_other;
   if not found then raise exception 'RAIN_MEETING_INVALID'; end if;
-  update rain_town.invites i set last_action = clock_timestamp() where i.id = player_id
-  and (i.last_action is null or i.last_action < clock_timestamp() - interval '2 seconds');
+  update rain_town.browser_players b set last_action = clock_timestamp() where b.id = player_id
+  and (b.last_action is null or b.last_action < clock_timestamp() - interval '2 seconds');
   if not found then raise exception 'RAIN_ACTION_LIMIT'; end if;
   next_turn := rain_town.advance_clock();
   perform rain_town.record_meeting(first_resident, second_resident, p_place, next_turn);
@@ -286,23 +302,24 @@ begin
 end;
 $$;
 
-create or replace function public.rain_town_visit(p_code text, p_place text)
+create or replace function public.rain_town_visit(p_token text, p_place text)
 returns jsonb
 language plpgsql volatile security definer set search_path = ''
 as $$
 declare
-  player_id uuid := rain_town.player(p_code);
+  player_id uuid := rain_town.browser_player(p_token);
   place_info record;
   nickname text;
 begin
   select * into place_info from rain_town.place_info(p_place);
   if not found then raise exception 'RAIN_PLACE_INVALID'; end if;
+  if player_id is null then raise exception 'RAIN_RESIDENT_MISSING'; end if;
   perform 1 from rain_town.world w where w.singleton for update;
-  update rain_town.invites i set last_action = clock_timestamp() where i.id = player_id
-  and (i.last_action is null or i.last_action < clock_timestamp() - interval '2 seconds');
+  update rain_town.browser_players b set last_action = clock_timestamp() where b.id = player_id
+  and (b.last_action is null or b.last_action < clock_timestamp() - interval '2 seconds');
   if not found then raise exception 'RAIN_ACTION_LIMIT'; end if;
   update rain_town.residents r set place = p_place, mood = '在附近逛逛'
-  where r.owner_id = player_id returning r.name into nickname;
+  where r.browser_id = player_id returning r.name into nickname;
   if not found then raise exception 'RAIN_RESIDENT_MISSING'; end if;
   perform rain_town.advance_clock();
   perform rain_town.add_event('solo', nickname || '去了' || place_info.name, place_info.activity);
@@ -310,7 +327,7 @@ begin
 end;
 $$;
 
-create or replace function public.rain_town_step(p_code text, p_manual boolean)
+create or replace function public.rain_town_step(p_token text, p_manual boolean)
 returns jsonb
 language plpgsql volatile security definer set search_path = ''
 as $$
@@ -324,8 +341,8 @@ declare
   venue text;
 begin
   if p_manual is true then
-    player_id := rain_town.player(p_code);
-    if not exists (select 1 from rain_town.residents r where r.owner_id = player_id) then
+    player_id := rain_town.browser_player(p_token);
+    if not exists (select 1 from rain_town.residents r where r.browser_id = player_id) then
       raise exception 'RAIN_RESIDENT_MISSING';
     end if;
   end if;
@@ -357,27 +374,12 @@ begin
 end;
 $$;
 
-create or replace function rain_town.issue_invites(p_count integer)
-returns table (invite_code text)
-language sql volatile set search_path = ''
-as $$
-  with codes as materialized (
-    select replace(gen_random_uuid()::text, '-', '') as code
-    from generate_series(1, greatest(0, least(p_count, 100)))
-  ), issued as (
-    insert into rain_town.invites (code_hash)
-    select sha256(convert_to(code, 'UTF8')) from codes
-    returning code_hash
-  )
-  select c.code from codes c join issued i on sha256(convert_to(c.code, 'UTF8')) = i.code_hash;
-$$;
-
 revoke all on all tables in schema rain_town from public, anon, authenticated;
 revoke all on all functions in schema rain_town from public, anon, authenticated;
-revoke all on function public.rain_town_read(), public.rain_town_sign_in(text),
+revoke all on function public.rain_town_read(), public.rain_town_find(text),
   public.rain_town_save(text, jsonb, boolean), public.rain_town_meet(text, text, text),
   public.rain_town_visit(text, text), public.rain_town_step(text, boolean) from public;
-grant execute on function public.rain_town_read(), public.rain_town_sign_in(text),
+grant execute on function public.rain_town_read(), public.rain_town_find(text),
   public.rain_town_save(text, jsonb, boolean), public.rain_town_meet(text, text, text),
   public.rain_town_visit(text, text), public.rain_town_step(text, boolean) to anon, authenticated;
 
