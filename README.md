@@ -13,3 +13,9 @@
 安卓构建使用 JDK 17、Android SDK Platform 35 和 Build Tools。用各项目的 `build.ps1` 并传入所需路径。签名材料应保存在仓库外；首次自行构建的安装包要使用自己的签名，覆盖已安装的版本时需沿用原签名。
 
 小诗历「每日一句」是后续想法；会与「每日一首」分开，计划收录有明确出处的古今中外书摘。
+
+## 毛毛雨小镇
+
+可以捏小人、安排见面、观察居民交朋友的网页生活模拟游戏。当前在线试玩使用浏览器本地存档。共享版的服务器存档和邀请码配置随源码提供。
+
+[在线试玩](https://inspector-ran.github.io/Funny-Project/) · [项目源码](little-rain-town/) · [共享版配置](little-rain-town/backend/README.md)
