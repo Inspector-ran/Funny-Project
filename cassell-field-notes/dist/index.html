@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#111a1c">
+  <title>卡塞尔见习录 · 卡塞尔学院文字冒险</title>
+  <meta name="description" content="四项卡塞尔学院文字冒险。去旧泵站、南楼、风雪观测站，或在自由一日散场后，与原著角色核对一份填错的回执。">
+  <meta property="og:title" content="卡塞尔见习录 · 你的卡塞尔入学故事">
+  <meta property="og:description" content="四项任务，三位同伴的旧事。自由一日结束后，诺诺、零、路明非、楚子航和恺撒也将加入调查。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://cassell-rain-night.deed.page/">
+  <meta property="og:image" content="./share-cover.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="卡塞尔见习录，雨中的卡塞尔学院与亮着暖灯的站台">
+  <link rel="icon" type="image/svg+xml" href="./crest.svg">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <div class="atmosphere" aria-hidden="true"><div class="rain"></div></div>
+  <header class="masthead">
+    <button id="home" class="brand" aria-label="返回游戏首页"><img src="./crest.svg" alt="" width="32" height="36"><span>卡塞尔见习录<small>卡塞尔学院 · 非官方文字冒险</small></span></button>
+    <button id="collection" class="quiet-button"><span class="desktop-label">结局档案</span><span class="mobile-label">档案</span><span id="collection-count" class="count">0 / 17</span></button>
+  </header>
+
+  <main>
+    <section id="landing" class="landing" aria-labelledby="main-title">
+      <div class="hero-art" aria-hidden="true"><img src="./campus.svg" alt=""><div class="station-sign">CASSELL · 入学专列</div></div>
+      <div class="intro">
+        <p class="eyebrow">一场从雨夜开始的文字冒险</p>
+        <h1 id="main-title">卡塞尔<span>见习录</span><i aria-hidden="true">。</i></h1>
+        <p class="tagline">录取通知的最后一行，<br>没有告诉你该怎样告别普通生活。</p>
+        <div class="mission-current">
+          <div class="mission-current-line"><h2 id="mission-name">旧泵站见习</h2><button id="missions-home" type="button" class="mission-select">切换任务</button></div>
+          <p id="mission-description" class="premise">调查学院里的旧记录，再决定怎样走进泵站。</p>
+        </div>
+        <form id="start-form" class="start-form">
+          <label for="player-name">你的名字</label>
+          <div class="name-row"><input id="player-name" name="name" type="text" maxlength="20" placeholder="新生" autocomplete="off" aria-describedby="name-note"><button id="start-mission" class="primary" type="submit">登上列车</button></div>
+          <p id="name-note" class="micro">不必填写真实姓名 · 15 章 · 8 个结局</p>
+        </form>
+        <button id="continue" class="continue-button" hidden>继续上次旅程 <span id="continue-info"></span></button>
+        <div class="intro-actions"><button id="cafeteria-home" class="text-button companion-link">去食堂</button><button id="companions" class="text-button companion-link">同伴通讯</button><button id="landing-saves" class="text-button">读取存档</button><button id="rules" class="text-button">入学须知</button><button id="share-home" class="text-button">邀请朋友</button></div>
+      </div>
+      <p class="hero-footnote">有人在站台等你。<span>列车即将到站。</span></p>
+    </section>
+
+    <section id="game" class="game" hidden aria-labelledby="scene-title">
+      <aside class="dossier">
+        <p id="active-mission-title" class="eyebrow">新生档案</p><h2 id="player-label"></h2><p id="partner-label" class="dossier-caption">同伴：林舟 · 二年级</p>
+        <div class="stats">
+          <div class="stat"><div><span>血统值</span><strong id="blood-number">45</strong></div><progress id="blood-bar" max="100" value="45" aria-label="血统值"></progress><small>共鸣越强，风险也越近</small></div>
+          <div class="stat"><div><span>精神值</span><strong id="spirit-number">75</strong></div><progress id="spirit-bar" max="100" value="75" aria-label="精神值"></progress><small>记住你是谁</small></div>
+          <div class="stat"><div><span>好感度</span><strong id="favor-number">20</strong></div><progress id="favor-bar" max="100" value="20" aria-label="同伴好感度"></progress><small>有人愿意与你并肩</small></div>
+        </div>
+        <div class="chapter-track"><p id="chapter-position"></p><div id="chapter-dots" aria-hidden="true"></div></div>
+        <p class="save-status" id="save-status" role="status">进度保存在此浏览器</p>
+      </aside>
+      <article class="story-panel">
+        <div class="chapter-label"><span id="chapter-label"></span><span id="ending-marker" hidden>本周目已完成</span><button id="toggle-art" type="button" class="art-toggle" aria-controls="chapter-illustration" aria-pressed="true" hidden>插图 <span aria-hidden="true">开</span></button></div>
+        <div class="reading-sheet">
+          <figure id="chapter-illustration" class="chapter-illustration" aria-hidden="true" hidden></figure>
+          <h2 id="scene-title" tabindex="-1"></h2>
+          <div id="last-action" class="last-action" hidden><p class="eyebrow">刚才的选择</p><p id="last-result"></p><p id="stat-changes" class="stat-changes"></p></div>
+          <div id="story-text" class="story-text"></div>
+        </div>
+        <div id="choices" class="choices" aria-label="选择下一步行动"></div>
+        <div id="ending-actions" class="ending-actions" hidden><p class="ending-note">任务结束。你可以在「同伴通讯」看看有没有新的消息。</p><button id="ending-cafeteria" class="secondary" hidden>去食堂找林舟</button><button id="restart" class="secondary">重玩任务</button><button id="ending-missions" class="primary">选下一项任务</button><button id="ending-companions" class="secondary">同伴通讯</button><button id="share-ending" class="secondary">分享</button></div>
+        <p class="chapter-bottom" id="chapter-bottom">选择之后，故事会继续。</p>
+      </article>
+    </section>
+  </main>
+
+  <nav id="toolbar" class="toolbar" hidden aria-label="游戏工具"><button id="save-menu">存档 / 读档</button><button id="journal">行动记录</button><button id="missions-game">切换任务</button><button id="share-game">邀请朋友</button></nav>
+  <footer class="footer">非官方同人文字游戏 · 原创支线故事<span>存档只保存在当前浏览器，可导出备份。</span></footer>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <dialog id="modal" aria-labelledby="modal-title"><div class="modal-head"><h2 id="modal-title"></h2><button id="close-modal" class="close-button" aria-label="关闭弹窗">×</button></div><div id="modal-body"></div></dialog>
+  <input id="import-file" type="file" accept=".json,application/json" hidden>
+  <noscript><p class="noscript">这个游戏需要启用 JavaScript。请在支持 JavaScript 的浏览器中打开。</p></noscript>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

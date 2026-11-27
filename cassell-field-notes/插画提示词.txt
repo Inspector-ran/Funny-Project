@@ -1,0 +1,162 @@
+《卡塞尔见习录》章节插画提示词
+素材：内置 imagegen 生成，每个场景单独生成，转为 WebP 后作为文字后的淡背景。
+
+通用提示词
+Illustration-story. One distinct landscape game chapter still, wide 16:9. Photorealistic cinematic narrative photography with subtle painterly finish, readable cinematic lighting, restrained cool teal, slate and warm amber, realistic surfaces and late 2000s campus props, atmospheric visual novel tone, center-wide composition with room to crop slightly on mobile. A single continuous scene. No text, no legible labels, no logo, no borders, no collage, no watermarks. Human subjects when appropriate shown small, in silhouette, from behind, or through natural hands; no existing licensed character designs. Keep it calm, grounded, evocative.
+
+各场景后接的提示词
+arrival — 雨夜空站台，黑色列车驶来，站台灯映在湿地上
+Rainy small isolated railway platform, an unmarked black passenger train arriving slowly through gentle rain, single warm old station light reflecting on wet paving, suitcase silhouette under the canopy, distant blue mist, low eye-level perspective.
+
+interview — 旧钟与耳机放在入学评估室的桌上
+Quiet university hearing-test room, older black padded headphones lying beside a brass stop button on a pale wood desk, plain white wall with round clock and wilting plant, soft gray overcast light behind frosted glass.
+
+dorm — 暖灯下的宿舍窗台，教材摊在桌上
+Warm student dorm desk near wet window, open textbook with unmarked diagrams, small desk lamp and cafe voucher, bundled campus pedestrians beyond the glass, peaceful and lived-in.
+
+briefing — 食堂窗边的咖啡和防水任务袋
+Campus dining hall before lunch, two modest paper cups of coffee and a clear waterproof folder containing a site map spread on a table, early light across chairs, wet campus path outside.
+
+archives — 旧档案室里的纸箱、值班簿和录音带
+Deep university archive aisle with cardboard boxes and shelves, one open paper logbook and a cassette tape on desk under a warm lamp, moody dark teal dust and pale paper.
+
+workshop — 拔掉插头的旧接收机和两部对讲机
+Campus equipment workshop workbench, old unplugged radio receiver with open empty battery compartment, pair of handheld radios nearby, organized worn tools and frosted workshop light.
+
+infirmary — 医务室窗边的一杯凉水，窗外有旗杆
+Quiet campus infirmary bay, glass of still water beside pale blue curtain at open window, distant flag rope and railing outside, cold afternoon haze and restrained warm interior.
+
+letters — 校园行政楼门厅的雨伞与未寄出的便笺
+University administration lobby with a row of umbrellas and worn brass message box, cream blank contact card on counter and the path outside softly lit, quiet afternoon before rain.
+
+station — 湖边的旧泵站，雨水漫过入口台阶
+Weathered brick pumping station beside a lake at dusk, rain-speckled reeds, wide shot of a small cold building with one faint lit utility window and steps, restrained industrial mood.
+
+approach_team — 两束手电照亮泵站的潮湿楼梯
+Interior pumping-station stairwell at night. Two distinct intersecting warm flashlight beams illuminate wet concrete stair edges and twin pipes, figures distant and faceless, inviting scale and distinct depth.
+
+approach_alone — 空荡的楼梯拐角，湿脚印在墙边断开
+An isolated narrowing concrete stair landing deep in old pump building, single flashlight beam picks out a line of wet footprints ending abruptly by peeling paint at a blind wall, no persons.
+
+approach_backup — 泵站值班桌，通讯器和被水渍浸过的线路图
+Old field desk in pumping station lookout room, half-open outer metal door and rain at night; handheld radio on tea-stained folded map, amber lamp dimly glowing, solitary empty work chair.
+
+passage_team — 蒙着水汽的观察窗内有一把空椅子
+Low concrete maintenance corridor in pump station, row of fogged observation windows, one patch wiped clear reveals a lone plain chair behind old glass, two lights offset across glass, eerie yet readable.
+
+passage_alone — 环廊的水线和对面平台上的一点手电光
+Circular industrial corridor with rusted rail and dark damp rising waterline along the walls, distant small flashlight beam visible on a half-level platform across the chamber, cinematic architectural vanishing point.
+
+passage_backup — 泵站铁梯平台上的三把旧椅子
+On the intermediate grated platform of an indoor metal staircase stand three mismatched utilitarian chairs in a row, isolated utility bulb over one, cold cyan shaft and warmer landing light.
+
+signal — 地下室中央有裂开的玻璃容器，墙面带浅痕
+Pumping-station basement mystery, cracked thick glass canister with a trace of deep rust-red liquid, ordinary industrial concrete marked with pale unreadable scratches, flashlight picking up reflected highlights, no gore.
+
+containment — 警示屏旁虚掩的窄门，门后的光照进地下室
+Slightly ajar narrow service door reveals a stair rising to a thin strip of rainy outside light, old warning monitor glowing diffusely on cold concrete, hint of original canister in soft background.
+
+collapse — 倒下的钢梁横在泵站控制台前，水从一侧流来
+Emergency scene in damp industrial basin, dropped heavy steel girder perpendicular to plain control desk with water pooling and reflected emergency red light, empty open escape stairs visible. No injuries, no gore; pre-outcome atmosphere.
+
+triage — 湖堤上应急车的红灯照着折叠桌
+Wet lakeside levee at night, abstract amber and red rescue vehicle lights reflect off grass, folding table with a few wet paper cups and an unmarked plan, steam rising from a cup, restrained tension, no injury.
+
+followup — 应急车后排，耳机旁摊着两份记录
+Interior of small old emergency van late at night, two separate unmarked paper logs and an earbud on a gray bench, rain on window and vague dawn glow, quiet contemplative close medium view.
+
+aftermath — 雨停后的湖面与放在车窗前的纸质报告
+Pale dawn following rain over calm dark lake, as seen from vehicle window, corner of plain accident report and moisture on glass in foreground, soft slate light, no people, a sense of elapsed time.
+
+south_arrival — 南楼一排亮窗下，失物架上摆着三样东西
+Old university South Hall entry on a late rainy evening, only one row of upstairs windows illuminated, just inside entry see a modest lost property shelf with keys, closed black notebook and blank postcard, warm tungsten atmosphere.
+
+south_register — 门房抽屉里抽出的交接手册和一叠旧登记页
+South Hall porter's desk, open thin paper handbook with generic blank rows, wooden drawer open, old keyring and old register, warm wall lamp and worn blue-green paint, close editorial view.
+
+south_storage — 地下库房里，灯光擦过复写纸上的压痕
+Below-grade campus storeroom, bank of dusty record cabinets, plain carbon-copy slip held at grazing light beside a little dehumidifier, tactile material detail, silver shadows and warm hand lamp.
+
+south_gallery — 南楼走廊的合照沿墙排开，窗外天色已晚
+Late evening college gallery corridor with a modest display of old group photographs on the wall, photo faces small and unreadable, dim distant window, subtle mustard wall light and deep blue outside.
+
+south_cabinet — 旧隔离柜的门开了一条缝，钥匙挂在柜门上
+Old cabinet inside university storage, slightly ajar metal door, small key ring hanging from same door, envelope and old dark notebook visible on inner shelf, warm strip of light, grounded still life.
+
+south_window — 窗边长椅、折好的照片和一张留给晚到者的便笺
+College upper hallway wide old window at night, side-on simple bench holds an unmarked folded note and aged photo turned partly face down, faint warm night lamp, rain-streaked glass.
+
+south_review — 值班桌上的旧信封和卷成一圈的电话线
+Empty South Hall desk at late night, age-toned sealed envelope beside two plain receipts and looped wire of a corded telephone. A brighter amber desk light and misty wall behind.
+
+south_owner — 有人在值班室门边拿着自己带来的信封
+A hesitant student seen from behind clasping a simple paper envelope at open university porter-room door at midnight, warm beam across dark tiles and waiting chairs; no face details, cinematic wide shot.
+
+south_transfer — 交接台上摆着黑色笔记和透明领用袋
+Simple wooden handover counter, still-life of a closed black notebook and partially open transparent document bag, separated originals and blank slips, low warm tungsten light, atmospheric university interior.
+
+south_report — 留着一行签名位置的纸，墨盒和台灯在旁边
+Close view of a single cream register held open beneath soft reading lamp at night and red stamp pad set aside, pen resting across blank lines, no text, intimate framing.
+
+snow_arrival — 初雪里的学院食堂和等在门口的摆渡车
+University dining hall seen across first snowfall on Saturday morning, old small shuttle bus waiting near the doorway with snow on windshield, warm kitchen windows and icy pale slate courtyard.
+
+snow_checkpoint — 半山腰的栏杆和两块朝向不同方向的路牌
+Snowy mountain checkpoint at a bend, closed low barrier and two weathered blank sign boards pointing different ways, snow dust on railing and an old enamel bowl, readable chilled gray afternoon.
+
+snow_ridge — 观测脊上有三根标杆，远处一把伞插在雪里
+A broad windswept mountain ridge dotted with three pale survey marker poles and one old dark umbrella half buried in snow at the fourth position, shifted snow ribbons and small distant station light.
+
+snow_shelter — 背风的旧器材棚，红门框里有围巾和木凳
+Wind-sheltered mountain equipment hut with worn red doorframe, a navy scarf laid on interior wooden bench and a door mat in snow, warm ghost of lantern light against blue daylight.
+
+snow_station — 风雪里的观测站，窗边是气象仪器和几份早餐
+Forgotten modest weather station in snow, low warmly lit windows reveal old measurement equipment and sealed packed breakfast on a bench, dramatic wide-angle external approach with windblown snow.
+
+snow_index — 观测站的签到表和复写纸带，一只手把两张记录分开
+Amid cold mountain weather station interior, a hand separates plain roster sheet from paper weather tape on oak desk; blue-white storm window and mugs softly behind; photorealistic no readable text.
+
+snow_guide — 一张手绘纸图和窗外两个被风雪盖住的屋顶
+Folded hand-drawn map with two simple circled roof shapes held over wooden windowsill looking at two small low roofs in white storm far below, foreground focus, traces of warm glove fabric.
+
+snow_signal — 观测站通讯器旁的名单与杯口升起的热气
+Snowy observation station radio corner, simple wired microphone and paper roster, mugs steaming on the windowsill, coats and figures merely blurred in distance; warm relief amid blue snow outside.
+
+snow_window — 观测站窗中能看清山脊逐渐显露
+Look through tall weather station window as heavy snow begins to lift, mountain ridgeline emerging in calm layered grays, faint shapes of approaching distant people, modest warm lamp reflection. No outcome or bodies.
+
+snow_report — 气象纸带、笔与暖灯，外面天色渐亮
+Desk in weather station after snow, weather print strips curled beside a pen and empty roster, pale snow light balancing an amber lamp, subtle tactile editorial tone.
+
+free_arrival — 自由一日散场后，侧门旁的失物篮和一把折叠伞
+Twilight at gothic academy gymnasium side entrance after a campus event, set aside empty flag stands without emblems and small basket holding a folded wet umbrella, scattered mist and amber windows, a calm aftermath, no depicted battle.
+
+free_desk — 器材回收处的两张折叠桌和中间的推车
+Gym equipment collection lobby, two distinct folding tables facing shared middle rolling cart with one ladder, framed through tiled institutional hallway, scattered blank papers and cooling light, no logos or people close up.
+
+free_room — 器材室的两联单和椅背上潮湿的布
+Small campus gear storage room, carbon-copy sheets neatly separated into two simple clips under overhead tungsten, damp cloth draped on chair and old shelving, cinematic practical detail.
+
+free_hall — 门厅里最后一辆推车，窗边有放凉的饭盒
+College sports hall glass lobby after clean-up, one empty equipment cart disappearing into a dark hall, two takeaway lunch boxes on windowsill, scattered rain highlights and left-behind folding table.
+
+free_lockers — 旧长柜、毛巾与两张散场照片
+Tall worn row of equipment lockers in amber twilight, lower locker ajar with towel, two small plain print photos on shelf showing vague cabinet shapes, real paint and weathered textures, no text.
+
+free_steps — 侧门台阶和挡在半开的门前的推车
+At a half-open inward-opening gym service door, a parked equipment cart partially frames tiled steps outside. Dim student silhouette sits on the lowest step, dark green wet surroundings, no close face.
+
+free_compare — 三张对照单据摊开在半暗的回收桌上
+Evening comparison of several separate plain campus forms and a folding umbrella on a scuffed gym recovery table, overhead warm pool of light against subdued dark hallway; reveal no readable data.
+
+free_student — 空出的椅子旁，一只手拿起了折叠伞
+At a quiet campus admin desk, person in a warm dry jacket seen only from shoulder and hands reaching for folded umbrella, spare chair pulled out and photo envelope touched by amber light.
+
+free_signatures — 夹板上的两份纸和递过去的一支笔
+Quiet handover desk seen from above, two separate narrow paper statements and a single shared pen being offered between two hands, no faces, white shirts with different sleeve colors, honest warm campus lamp.
+
+free_report — 值班室窗前放着回执和两只饭盒
+Quiet duty office past the hour, receipt and paper folder beside two simple takeaway food boxes, unmarked night duty placard softly blurred away, door and empty chairs in amber and deep blue.
+
+cafeteria — 快收餐的食堂里靠墙的一张桌，外套搭在椅背上
+Near-closing university cafeteria, one small table against a stone wall, an empty pull-out chair, plain paper coffee cup and bowls near muted amber light, damp windows and softly empty tables. Quiet, intimate without visible faces.
