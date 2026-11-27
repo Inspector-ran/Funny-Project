@@ -1,4 +1,5 @@
 begin;
+update rain_town.world set last_tick = clock_timestamp() - interval '1 minute' where singleton;
 set local role anon;
 
 do $$
@@ -12,9 +13,15 @@ declare
   first_id text;
   second_id text;
   resident_count integer;
+  starting_turn integer;
   town jsonb;
 begin
   town := public.rain_town_read();
+  starting_turn := (town ->> 'turn')::integer;
+  town := public.rain_town_step(null, false);
+  if (town ->> 'turn')::integer <> starting_turn + 1 then
+    raise exception 'The shared clock should advance for a visitor';
+  end if;
   resident_count := jsonb_array_length(town -> 'people');
   if resident_count < 3 then raise exception 'Public readers should see the starter town'; end if;
   if public.rain_town_find(first_token) ->> 'playerId' is not null then
